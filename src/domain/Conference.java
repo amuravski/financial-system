@@ -1,19 +1,19 @@
 package domain;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.rmi.UnexpectedException;
 
 public class Conference implements AutoCloseable {
 
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Conference.class);
 
     public void holdConference(int members) throws UnexpectedException {
         if (members < 1) {
             throw new UnexpectedException("No conference members.");
         }
-        logger.info("The conference was held.");
+        LOGGER.info("The conference was held.");
     }
 
     @Override

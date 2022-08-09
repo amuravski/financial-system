@@ -23,7 +23,6 @@ public class FinancialSystem {
         this.centralBank = centralBank;
     }
 
-
     public CentralBank getCentralBank() {
         return centralBank;
     }

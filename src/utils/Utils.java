@@ -4,14 +4,10 @@ import domain.*;
 import domain.bank.AbstractBank;
 import domain.company.AbstractCompany;
 import domain.exchange.AbstractExchange;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
 
 import java.math.BigDecimal;
 
 public class Utils {
-
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
 
     public static boolean applyForLoan(AbstractBank bank, AbstractCompany company, BigDecimal loanAmount) {
         BigDecimal bankAssets = bank.getAssets();

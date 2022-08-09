@@ -1,14 +1,14 @@
 package domain.exchange;
 
 import domain.FinancialActor;
-import domain.LicenceExtendable;
+import domain.LicenseExtendable;
 import domain.Regulatable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class AbstractExchange implements FinancialActor, LicenceExtendable, Regulatable {
+public class AbstractExchange implements FinancialActor, LicenseExtendable, Regulatable {
 
     private String name;
     private LocalDateTime licencedUntil;

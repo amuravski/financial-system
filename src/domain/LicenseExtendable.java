@@ -1,6 +1,6 @@
 package domain;
 
-public interface LicenceExtendable {
+public interface LicenseExtendable {
 
     void extendLicence(int periodInYears);
 

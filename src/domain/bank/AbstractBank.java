@@ -1,7 +1,7 @@
 package domain.bank;
 
 import domain.FinancialActor;
-import domain.LicenceExtendable;
+import domain.LicenseExtendable;
 import domain.exception.LicenseExpiredException;
 import domain.exception.NoSubsidiaryBankException;
 
@@ -13,7 +13,7 @@ import java.util.Objects;
 import static utils.Utils.addElement;
 import static utils.Utils.removeElement;
 
-public abstract class AbstractBank implements FinancialActor, LicenceExtendable {
+public abstract class AbstractBank implements FinancialActor, LicenseExtendable {
 
     private static final int DEFAULT_BANK_LICENCE_PERIOD = 2;
 

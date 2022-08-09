@@ -21,6 +21,6 @@ public class Conference implements AutoCloseable {
     }
 
     public static void closeConference(){
-        LOGGER.info("ty lads");
+        LOGGER.info("Thanks for attending everyone!");
     }
 }

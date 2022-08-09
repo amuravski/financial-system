@@ -19,4 +19,8 @@ public class Conference implements AutoCloseable {
     @Override
     public void close() {
     }
+
+    public static void closeConference(){
+        LOGGER.info("ty lads");
+    }
 }

@@ -1,2 +1,7 @@
+/log
+/out
+/target
+/.idea
+ssh_key.*
+*.iml
 *.log
-ssh_ley.*

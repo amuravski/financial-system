@@ -2,14 +2,15 @@ package domain.company;
 
 import domain.exception.IllegalAmountOfMembersException;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class LLC extends AbstractCompany {
 
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
+    private static final Logger LOGGER = LogManager.getLogger(LLC.class);
+
     private static final int MIN_LLC_SHAREHOLDERS_AMOUNT = 2;
     private static final int MAX_LLC_SHAREHOLDERS_AMOUNT = 50;
 
@@ -43,7 +44,7 @@ public class LLC extends AbstractCompany {
 
     @Override
     public void meet() {
-        logger.info("LLC shareholders meeting with a size of " + shareHoldersAmount);
+        LOGGER.info("LLC shareholders meeting with a size of " + shareHoldersAmount);
     }
 
     @Override

@@ -1,14 +1,14 @@
 package domain.company;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 public class CJSC extends AbstractCompany {
 
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
+    private static final Logger LOGGER = LogManager.getLogger(CJSC.class);
 
     private int directorsAmount;
 
@@ -36,7 +36,7 @@ public class CJSC extends AbstractCompany {
 
     @Override
     public void meet() {
-        logger.info("CJSC board of directors meeting with a board size of " + directorsAmount);
+        LOGGER.info("CJSC board of directors meeting with a board size of " + directorsAmount);
     }
 
     @Override

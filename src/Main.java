@@ -24,17 +24,17 @@ public class Main {
         System.setProperty("log4j.configurationFile", "log4j2.xml");
     }
 
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
+    private static final Logger LOGGER = (Logger) LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
         AbstractCompany company = null;
         try {
             company = new LLC("OOO Minsk", new BigDecimal("520.0"), new BigDecimal("250.0"), 12);
         } catch (IllegalAmountOfMembersException e) {
-            logger.error(e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             if (company != null) {
-                logger.info("Company " + company + " was successfully created.");
+                LOGGER.info("Company " + company + " was successfully created.");
             }
         }
         AbstractBank bank = new CommercialBank("FastBank", new BigDecimal("555555.0"), new BigDecimal("43434.0"));
@@ -45,31 +45,31 @@ public class Main {
         financialSystem.addCompany(company);
         BigDecimal loanAmount = new BigDecimal("260.0");
 
-        logger.info("Is company " + company.getName() + " allowed to borrow " + loanAmount.toString() +
+        LOGGER.info("Is company " + company.getName() + " allowed to borrow " + loanAmount.toString() +
                 " from a bank " + bank.getName() + ": " + applyForLoan(bank, company, loanAmount));
-        logger.info("Current key rate: " + centralBank.getKeyRate());
+        LOGGER.info("Current key rate: " + centralBank.getKeyRate());
 
         BigDecimal inflation = new BigDecimal("5.3");
 
-        logger.info("Current inflation: " + inflation.toString());
+        LOGGER.info("Current inflation: " + inflation.toString());
 
         centralBank.setCurrentInflation(inflation);
 
-        logger.info("Central bank meeting occurred.");
+        LOGGER.info("Central bank meeting occurred.");
 
         centralBank.meet();
 
-        logger.info("Current key rate: " + centralBank.getKeyRate());
+        LOGGER.info("Current key rate: " + centralBank.getKeyRate());
 
         AbstractExchange stockExchange = new StockExchange("NYSE", LocalDateTime.now().plusYears(5), new BigDecimal("0.02"));
         financialSystem.addExchange(stockExchange);
 
-        logger.info(stockExchange);
+        LOGGER.info(stockExchange);
 
         AbstractFund mutualFund = new MutualFund("Vanguard", new BigDecimal("100000.0"), new BigDecimal("100000.0"));
         financialSystem.addFund(mutualFund);
 
-        logger.info(mutualFund);
+        LOGGER.info(mutualFund);
 
         InsuranceBank insuranceBank = new InsuranceBank("InsurAce", new BigDecimal("189423.0"), new BigDecimal("99123.0"), LocalDateTime.now().plusYears(5), new BigDecimal("0.03"));
         financialSystem.addBank(insuranceBank);
@@ -81,10 +81,10 @@ public class Main {
         financialSystem.addBank(biggerInvestmentBank);
         financialSystem.addBank(mortgageBank);
 
-        logger.info("Big investment bank: " + biggerInvestmentBank);
-        logger.info("It's subsidiary: " + investmentBank);
-        logger.info(mortgageBank);
-        logger.info("All the banks in financial system: " + Arrays.toString(financialSystem.getBanks()) + "\n");
+        LOGGER.info("Big investment bank: " + biggerInvestmentBank);
+        LOGGER.info("It's subsidiary: " + investmentBank);
+        LOGGER.info(mortgageBank);
+        LOGGER.info("All the banks in financial system: " + Arrays.toString(financialSystem.getBanks()) + "\n");
 
         holdAllMeetings(financialSystem);
         extendAllLicences(financialSystem);
@@ -94,9 +94,9 @@ public class Main {
         try (Conference conference = new Conference()) {
             conference.holdConference(0);
         } catch (UnexpectedException e) {
-            logger.error(e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
-            logger.info("holdConference() called.");
+            LOGGER.info("holdConference() called.");
         }
     }
 }

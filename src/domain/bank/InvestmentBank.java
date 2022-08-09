@@ -2,7 +2,7 @@ package domain.bank;
 
 import domain.Reportable;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class InvestmentBank extends AbstractBank implements Reportable {
 
-    private static final Logger logger = (Logger) LogManager.getRootLogger();
+    private static final Logger LOGGER = LogManager.getLogger(InvestmentBank.class);
 
     private BigDecimal aum;
     private BigDecimal tradingFee;
@@ -87,6 +87,6 @@ public class InvestmentBank extends AbstractBank implements Reportable {
 
     @Override
     public void publishReport() {
-        logger.info(this.toString() + "\nReported AUM: " + aum);
+        LOGGER.info(this.toString() + "\nReported AUM: " + aum);
     }
 }

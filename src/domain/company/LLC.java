@@ -1,6 +1,6 @@
 package domain.company;
 
-import domain.exception.IllegalAmountOfMembers;
+import domain.exception.IllegalAmountOfMembersException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
@@ -15,12 +15,12 @@ public class LLC extends AbstractCompany {
 
     private int shareHoldersAmount;
 
-    public LLC(String name, BigDecimal assets, BigDecimal liabilities, int shareHoldersAmount) throws IllegalAmountOfMembers {
+    public LLC(String name, BigDecimal assets, BigDecimal liabilities, int shareHoldersAmount) throws IllegalAmountOfMembersException {
         super(name, assets, liabilities);
         setShareHoldersAmount(shareHoldersAmount);
     }
 
-    public LLC(String name, int shareHoldersAmount) throws IllegalAmountOfMembers {
+    public LLC(String name, int shareHoldersAmount) throws IllegalAmountOfMembersException {
         super(name);
         setShareHoldersAmount(shareHoldersAmount);
     }
@@ -33,11 +33,11 @@ public class LLC extends AbstractCompany {
         return shareHoldersAmount;
     }
 
-    public void setShareHoldersAmount(int shareHoldersAmount) throws IllegalAmountOfMembers {
+    public void setShareHoldersAmount(int shareHoldersAmount) throws IllegalAmountOfMembersException {
         if (shareHoldersAmount >= MIN_LLC_SHAREHOLDERS_AMOUNT && shareHoldersAmount <= MAX_LLC_SHAREHOLDERS_AMOUNT) {
             this.shareHoldersAmount = shareHoldersAmount;
         } else {
-            throw new IllegalAmountOfMembers("Shareholders number of " + shareHoldersAmount + " not supported.");
+            throw new IllegalAmountOfMembersException("Shareholders number of " + shareHoldersAmount + " not supported.");
         }
     }
 

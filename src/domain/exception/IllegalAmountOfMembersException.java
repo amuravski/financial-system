@@ -1,8 +1,8 @@
 package domain.exception;
 
-public class IllegalAmountOfMembers extends Exception {
+public class IllegalAmountOfMembersException extends Exception {
 
-    public IllegalAmountOfMembers(String errorMessage) {
+    public IllegalAmountOfMembersException(String errorMessage) {
         super(errorMessage);
     }
 

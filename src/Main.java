@@ -3,7 +3,7 @@ import domain.FinancialSystem;
 import domain.bank.*;
 import domain.company.AbstractCompany;
 import domain.company.LLC;
-import domain.exception.IllegalAmountOfMembers;
+import domain.exception.IllegalAmountOfMembersException;
 import domain.exchange.AbstractExchange;
 import domain.exchange.StockExchange;
 import domain.fund.AbstractFund;
@@ -30,8 +30,8 @@ public class Main {
         AbstractCompany company = null;
         try {
             company = new LLC("OOO Minsk", new BigDecimal("520.0"), new BigDecimal("250.0"), 12);
-        } catch (IllegalAmountOfMembers illegalAmountOfMembers) {
-            logger.error(illegalAmountOfMembers);
+        } catch (IllegalAmountOfMembersException e) {
+            logger.error(e);
         } finally {
             if (company != null) {
                 logger.info("Company " + company + " was successfully created.");

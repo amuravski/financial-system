@@ -1,8 +1,8 @@
 package domain.exception;
 
-public class NoLicenceException extends RuntimeException {
+public class LicenseExpiredException extends RuntimeException {
 
-    public NoLicenceException(String errorMessage, Throwable cause) {
+    public LicenseExpiredException(String errorMessage, Throwable cause) {
         super(errorMessage, cause);
     }
 

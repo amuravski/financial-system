@@ -2,7 +2,7 @@ package domain.bank;
 
 import domain.FinancialActor;
 import domain.LicenceExtendable;
-import domain.exception.NoLicenceException;
+import domain.exception.LicenseExpiredException;
 import domain.exception.NoSubsidiaryBankException;
 
 import java.math.BigDecimal;
@@ -150,7 +150,7 @@ public abstract class AbstractBank implements FinancialActor, LicenceExtendable 
             LocalDateTime newLicencedUntilDate = LicencedUntilDate.plusYears(extendedFor);
             setLicencedUntil(newLicencedUntilDate);
         } catch (NullPointerException e) {
-            throw new NoLicenceException(this.toString() + " has no licence.", e.getCause());
+            throw new LicenseExpiredException(this.toString() + " has no licence.", e.getCause());
         }
     }
 

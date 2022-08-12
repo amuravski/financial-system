@@ -2,7 +2,6 @@ package domain.bank;
 
 import java.math.BigDecimal;
 import java.rmi.UnexpectedException;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class MortgageBank extends CommercialBank {
@@ -10,26 +9,6 @@ public class MortgageBank extends CommercialBank {
     public static final int MORTGAGE_BANK_LICENCE_PERIOD = 5;
 
     private BigDecimal marginFractionRequirement;
-
-    public MortgageBank(String name, LocalDateTime licencedUntil, AbstractBank subsidiaryBank, BigDecimal requiredReserves, BigDecimal marginFractionRequirement) {
-        super(name, licencedUntil, subsidiaryBank, requiredReserves);
-        this.marginFractionRequirement = marginFractionRequirement;
-    }
-
-    public MortgageBank(String name, LocalDateTime licencedUntil, BigDecimal requiredReserves, BigDecimal marginFractionRequirement) {
-        super(name, licencedUntil, requiredReserves);
-        this.marginFractionRequirement = marginFractionRequirement;
-    }
-
-    public MortgageBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, AbstractBank[] subsidiaryBanks, BigDecimal requiredReserves, BigDecimal marginFractionRequirement) {
-        super(name, assets, liabilities, licencedUntil, subsidiaryBanks, requiredReserves);
-        this.marginFractionRequirement = marginFractionRequirement;
-    }
-
-    public MortgageBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, BigDecimal requiredReserves, BigDecimal marginFractionRequirement) {
-        super(name, assets, liabilities, licencedUntil, requiredReserves);
-        this.marginFractionRequirement = marginFractionRequirement;
-    }
 
     public MortgageBank(String name) {
         super(name);

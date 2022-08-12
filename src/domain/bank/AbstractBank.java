@@ -7,11 +7,9 @@ import domain.exception.NoSubsidiaryBankException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
-import static utils.Utils.addElement;
-import static utils.Utils.removeElement;
 
 public abstract class AbstractBank implements FinancialActor, LicenseExtendable {
 
@@ -21,31 +19,11 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
     private BigDecimal assets;
     private BigDecimal liabilities;
     private LocalDateTime licencedUntil;
-    private AbstractBank[] subsidiaryBanks;
+    private List<AbstractBank> subsidiaryBanks;
     private String BIC;
 
-    public AbstractBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, AbstractBank[] subsidiaryBanks, String BIC) {
+    public AbstractBank(String name) {
         this.name = name;
-        this.assets = assets;
-        this.liabilities = liabilities;
-        this.licencedUntil = licencedUntil;
-        this.subsidiaryBanks = subsidiaryBanks;
-        this.BIC = BIC;
-    }
-
-    public AbstractBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, AbstractBank[] subsidiaryBanks) {
-        this.name = name;
-        this.assets = assets;
-        this.liabilities = liabilities;
-        this.licencedUntil = licencedUntil;
-        this.subsidiaryBanks = subsidiaryBanks;
-    }
-
-    public AbstractBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil) {
-        this.name = name;
-        this.assets = assets;
-        this.liabilities = liabilities;
-        this.licencedUntil = licencedUntil;
     }
 
     public AbstractBank(String name, BigDecimal assets, BigDecimal liabilities) {
@@ -54,28 +32,15 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.liabilities = liabilities;
     }
 
-    public AbstractBank(String name, LocalDateTime licencedUntil, AbstractBank subsidiaryBank) {
-        this.name = name;
-        this.licencedUntil = licencedUntil;
-        addSubsidiary(subsidiaryBank);
-    }
-
-    public AbstractBank(String name, LocalDateTime licencedUntil) {
-        this.name = name;
-        this.licencedUntil = licencedUntil;
-    }
-
-    public AbstractBank(String name) {
-        this.name = name;
-    }
-
     public void addSubsidiary(AbstractBank subsidiary) {
-        FinancialActor[] newBanksArray = addElement(subsidiaryBanks, subsidiary);
-        subsidiaryBanks = Arrays.copyOf(newBanksArray, newBanksArray.length, AbstractBank[].class);
+        if (subsidiaryBanks == null) {
+            subsidiaryBanks = new ArrayList<>();
+        }
+        subsidiaryBanks.add(subsidiary);
     }
 
     public void removeSubsidiary(AbstractBank subsidiary) {
-        this.subsidiaryBanks = (AbstractBank[]) removeElement(subsidiaryBanks, subsidiary);
+        subsidiaryBanks.remove(subsidiary);
     }
 
     public String getBIC() {
@@ -122,16 +87,16 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.licencedUntil = licencedUntil;
     }
 
-    public AbstractBank[] getSubsidiaryBanks() {
+    public List<AbstractBank> getSubsidiaryBanks() {
         if (subsidiaryBanks == null) {
             throw new NoSubsidiaryBankException(this.toString() + " has no subsidiaries.");
-        } else if (subsidiaryBanks.length == 0) {
+        } else if (subsidiaryBanks.size() == 0) {
             throw new NoSubsidiaryBankException(this.toString() + " has no subsidiaries.");
         }
         return subsidiaryBanks;
     }
 
-    public void setSubsidiaryBanks(AbstractBank[] subsidiaryBanks) {
+    public void setSubsidiaryBanks(List<AbstractBank> subsidiaryBanks) {
         this.subsidiaryBanks = subsidiaryBanks;
     }
 
@@ -174,7 +139,7 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
                 ", assets=" + assets +
                 ", liabilities=" + liabilities +
                 ", licencedUntil=" + licencedUntil +
-                ", subsidiaryBanks=" + Arrays.toString(subsidiaryBanks) +
+                ", subsidiaryBanks=" + subsidiaryBanks +
                 ", BIC='" + BIC + '\'' +
                 '}';
     }

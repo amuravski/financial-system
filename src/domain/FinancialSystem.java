@@ -6,89 +6,96 @@ import domain.company.AbstractCompany;
 import domain.exchange.AbstractExchange;
 import domain.fund.AbstractFund;
 
-import java.util.Arrays;
-
-import static utils.Utils.addElement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FinancialSystem {
 
     private final CentralBank centralBank;
-    private AbstractBank[] banks;
-    private AbstractCompany[] companies;
-    private AbstractExchange[] exchanges;
-    private AbstractFund[] funds;
-    private Individual[] individuals;
+    private List<AbstractBank> banks;
+    private List<AbstractCompany> companies;
+    private List<AbstractExchange> exchanges;
+    private List<AbstractFund> funds;
+    private List<Individual> individuals;
 
     public FinancialSystem(CentralBank centralBank) {
         this.centralBank = centralBank;
+        banks = new ArrayList<>();
+        companies = new ArrayList<>();
+        exchanges = new ArrayList<>();
+        funds = new ArrayList<>();
+        individuals = new ArrayList<>();
     }
 
     public CentralBank getCentralBank() {
         return centralBank;
     }
 
-    public AbstractBank[] getBanks() {
+    public List<AbstractBank> getBanks() {
         return banks;
     }
 
-    public void setBanks(AbstractBank[] banks) {
+    public void setBanks(List<AbstractBank> banks) {
         this.banks = banks;
     }
 
-    public AbstractCompany[] getCompanies() {
+    public List<AbstractCompany> getCompanies() {
         return companies;
     }
 
-    public void setCompanies(AbstractCompany[] companies) {
+    public void setCompanies(List<AbstractCompany> companies) {
         this.companies = companies;
     }
 
-    public AbstractExchange[] getExchanges() {
+    public List<AbstractExchange> getExchanges() {
         return exchanges;
     }
 
-    public void setExchanges(AbstractExchange[] exchanges) {
+    public void setExchanges(List<AbstractExchange> exchanges) {
         this.exchanges = exchanges;
     }
 
-    public AbstractFund[] getFunds() {
+    public List<AbstractFund> getFunds() {
         return funds;
     }
 
-    public void setFunds(AbstractFund[] funds) {
+    public void setFunds(List<AbstractFund> funds) {
         this.funds = funds;
     }
 
-    public Individual[] getIndividuals() {
+    public List<Individual> getIndividuals() {
         return individuals;
     }
 
-    public void setIndividuals(Individual[] individuals) {
+    public void setIndividuals(List<Individual> individuals) {
         this.individuals = individuals;
     }
 
-    public void addBank(AbstractBank bankToAdd) {
-        FinancialActor[] newBanksArray = addElement(banks, bankToAdd);
-        banks = Arrays.copyOf(newBanksArray, newBanksArray.length, AbstractBank[].class);
+    public <E extends FinancialActor> void addActor(E actorToAdd) {
+        if (actorToAdd instanceof AbstractBank) {
+            banks.add((AbstractBank) actorToAdd);
+        } else if (actorToAdd instanceof AbstractCompany) {
+            companies.add((AbstractCompany) actorToAdd);
+        } else if (actorToAdd instanceof AbstractExchange) {
+            exchanges.add((AbstractExchange) actorToAdd);
+        } else if (actorToAdd instanceof AbstractFund) {
+            funds.add((AbstractFund) actorToAdd);
+        } else if (actorToAdd instanceof Individual) {
+            individuals.add((Individual) actorToAdd);
+        }
     }
 
-    public void addCompany(AbstractCompany companyToAdd) {
-        FinancialActor[] newCompaniesArray = addElement(companies, companyToAdd);
-        companies = Arrays.copyOf(newCompaniesArray, newCompaniesArray.length, AbstractCompany[].class);
-    }
-
-    public void addIndividual(Individual individualToAdd) {
-        FinancialActor[] newIndividualsArray = addElement(individuals, individualToAdd);
-        individuals = Arrays.copyOf(newIndividualsArray, newIndividualsArray.length, Individual[].class);
-    }
-
-    public void addExchange(AbstractExchange exchangeToAdd) {
-        FinancialActor[] newExchangesArray = addElement(exchanges, exchangeToAdd);
-        exchanges = Arrays.copyOf(newExchangesArray, newExchangesArray.length, AbstractExchange[].class);
-    }
-
-    public void addFund(AbstractFund fundToAdd) {
-        FinancialActor[] newFundsArray = addElement(funds, fundToAdd);
-        funds = Arrays.copyOf(newFundsArray, newFundsArray.length, AbstractFund[].class);
+    public <E extends FinancialActor> void removeActor(E actorToAdd) {
+        if (actorToAdd instanceof AbstractBank) {
+            banks.remove(actorToAdd);
+        } else if (actorToAdd instanceof AbstractCompany) {
+            companies.remove(actorToAdd);
+        } else if (actorToAdd instanceof AbstractExchange) {
+            exchanges.remove(actorToAdd);
+        } else if (actorToAdd instanceof AbstractFund) {
+            funds.remove(actorToAdd);
+        } else if (actorToAdd instanceof Individual) {
+            individuals.remove(actorToAdd);
+        }
     }
 }

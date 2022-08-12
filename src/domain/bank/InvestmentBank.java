@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class InvestmentBank extends AbstractBank implements Reportable {
@@ -15,30 +14,8 @@ public class InvestmentBank extends AbstractBank implements Reportable {
     private BigDecimal aum;
     private BigDecimal tradingFee;
 
-    public InvestmentBank(String name, LocalDateTime licencedUntil, AbstractBank subsidiaryBank, BigDecimal aum, BigDecimal tradingFee) {
-        super(name, licencedUntil, subsidiaryBank);
-        this.aum = aum;
-        this.tradingFee = tradingFee;
-    }
-
-    public InvestmentBank(String name, LocalDateTime licencedUntil) {
-        super(name, licencedUntil);
-    }
-
     public InvestmentBank(String name) {
         super(name);
-    }
-
-    public InvestmentBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, AbstractBank[] subsidiaryBanks, BigDecimal aum, BigDecimal tradingFee) {
-        super(name, assets, liabilities, licencedUntil, subsidiaryBanks);
-        this.aum = aum;
-        this.tradingFee = tradingFee;
-    }
-
-    public InvestmentBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, BigDecimal aum, BigDecimal tradingFee) {
-        super(name, assets, liabilities, licencedUntil);
-        this.aum = aum;
-        this.tradingFee = tradingFee;
     }
 
     public BigDecimal getAum() {

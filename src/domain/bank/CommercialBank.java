@@ -3,39 +3,23 @@ package domain.bank;
 import domain.Regulatable;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class CommercialBank extends AbstractBank implements Regulatable {
 
     private BigDecimal requiredReserves;
 
-    public CommercialBank(String name, LocalDateTime licencedUntil, AbstractBank subsidiaryBank, BigDecimal requiredReserves) {
-        super(name, licencedUntil, subsidiaryBank);
-        this.requiredReserves = requiredReserves;
-    }
-
-    public CommercialBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, BigDecimal requiredReserves) {
-        super(name, assets, liabilities, licencedUntil);
-        this.requiredReserves = requiredReserves;
-    }
-
-    public CommercialBank(String name, BigDecimal assets, BigDecimal liabilities) {
-        super(name, assets, liabilities);
-    }
-
-    public CommercialBank(String name, LocalDateTime licencedUntil, BigDecimal requiredReserves) {
-        super(name, licencedUntil);
-        this.requiredReserves = requiredReserves;
-    }
-
-    public CommercialBank(String name, BigDecimal assets, BigDecimal liabilities, LocalDateTime licencedUntil, AbstractBank[] subsidiaryBanks, BigDecimal requiredReserves) {
-        super(name, assets, liabilities, licencedUntil, subsidiaryBanks);
+    public CommercialBank(String name, BigDecimal requiredReserves) {
+        super(name);
         this.requiredReserves = requiredReserves;
     }
 
     public CommercialBank(String name) {
         super(name);
+    }
+
+    public CommercialBank(String name, BigDecimal assets, BigDecimal liabilities) {
+        super(name, assets, liabilities);
     }
 
     public BigDecimal getRequiredReserves() {

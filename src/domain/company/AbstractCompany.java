@@ -4,6 +4,8 @@ import domain.FinancialActor;
 import domain.Meetable;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class AbstractCompany implements FinancialActor, Meetable {
@@ -11,11 +13,13 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
     private String name;
     private BigDecimal assets;
     private BigDecimal liabilities;
+    private Map<String, Integer> sharesPerHolder;
 
     public AbstractCompany(String name, BigDecimal assets, BigDecimal liabilities) {
         this.name = name;
         this.assets = assets;
         this.liabilities = liabilities;
+        sharesPerHolder = new HashMap<>();
     }
 
     public AbstractCompany(String name) {
@@ -44,6 +48,14 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
 
     public void setLiabilities(BigDecimal liabilities) {
         this.liabilities = liabilities;
+    }
+
+    public Map<String, Integer> getSharesPerHolder() {
+        return sharesPerHolder;
+    }
+
+    public void setSharesPerHolder(Map<String, Integer> sharesPerHolder) {
+        this.sharesPerHolder = sharesPerHolder;
     }
 
     @Override

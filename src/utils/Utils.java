@@ -1,15 +1,19 @@
 package utils;
 
-import domain.*;
+import domain.FinancialSystem;
+import domain.Meetable;
+import domain.Regulatable;
+import domain.Reportable;
 import domain.bank.AbstractBank;
 import domain.company.AbstractCompany;
 import domain.exchange.AbstractExchange;
 
 import java.math.BigDecimal;
+import java.util.*;
 
 public class Utils {
 
-    public static boolean applyForLoan(AbstractBank bank, AbstractCompany company, BigDecimal loanAmount) {
+    public static <E extends AbstractBank, U extends AbstractCompany> boolean applyForLoan(E bank, U company, BigDecimal loanAmount) {
         BigDecimal bankAssets = bank.getAssets();
         BigDecimal bankLiabilities = bank.getLiabilities();
         BigDecimal companyAssets = company.getAssets();
@@ -19,34 +23,6 @@ public class Utils {
         return bankBalance.compareTo(BigDecimal.valueOf(0)) > 0 &&
                 companyBalance.compareTo(loanAmount) >= 0 &&
                 bankBalance.compareTo(loanAmount) >= 0;
-    }
-
-    public static FinancialActor[] addElement(FinancialActor[] array, FinancialActor elementToAdd) {
-        int n;
-        if (array == null) {
-            n = 0;
-        } else {
-            n = array.length;
-        }
-        FinancialActor[] newArray = new FinancialActor[n + 1];
-        for (int i = 0; i < n; i++)
-            newArray[i] = array[i];
-        newArray[n] = elementToAdd;
-        return newArray;
-    }
-
-    public static FinancialActor[] removeElement(FinancialActor[] array, FinancialActor elementToRemove) {
-        if (array.length - 1 <= 0) {
-            return new FinancialActor[0];
-        }
-        FinancialActor[] newArray = new FinancialActor[array.length - 1];
-        for (int i = 0; i < array.length; i++) {
-            if (array[i].equals(elementToRemove)) {
-                continue;
-            }
-            newArray[i] = array[i];
-        }
-        return newArray;
     }
 
     public static void extendAllLicences(FinancialSystem financialSystem) {
@@ -96,5 +72,20 @@ public class Utils {
         for (AbstractExchange exchange : financialSystem.getExchanges()) {
             exchange.setRequiredReserves(requiredReserves);
         }
+    }
+
+    public static Map<String, Integer> sortShareholders(AbstractCompany company) {
+        List<Map.Entry<String, Integer>> list = new ArrayList<>(company.getSharesPerHolder().entrySet());
+        list.sort(new Comparator<>() {
+            @Override
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        Map<String, Integer> sortedSharesPerHolders = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : list) {
+            sortedSharesPerHolders.put(entry.getKey(), entry.getValue());
+        }
+        return sortedSharesPerHolders;
     }
 }

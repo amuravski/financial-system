@@ -126,6 +126,5 @@ public class Main {
         bankWithTheSameBic.setBic(financialSystem.getBanks().get(0).getBic());
         banks.add(bankWithTheSameBic);
         LOGGER.info("Bank in set: " + banks.size());
-
     }
 }

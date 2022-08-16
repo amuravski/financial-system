@@ -40,21 +40,6 @@ public class InvestmentBank extends AbstractBank implements Reportable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof InvestmentBank)) return false;
-        if (!super.equals(o)) return false;
-        InvestmentBank other = (InvestmentBank) o;
-        return Objects.equals(aum, other.aum) &&
-                Objects.equals(tradingFee, other.tradingFee);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), aum, tradingFee);
-    }
-
-    @Override
     public String toString() {
         return "InvestmentBank{" +
                 "aum=" + aum +

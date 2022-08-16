@@ -36,20 +36,6 @@ public class MortgageBank extends CommercialBank {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MortgageBank)) return false;
-        if (!super.equals(o)) return false;
-        MortgageBank other = (MortgageBank) o;
-        return marginFractionRequirement.equals(other.marginFractionRequirement);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), marginFractionRequirement);
-    }
-
-    @Override
     public String toString() {
         return "MortgageBank{" +
                 "marginFractionRequirement=" + marginFractionRequirement + ", " + super.toString() +

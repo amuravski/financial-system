@@ -115,5 +115,17 @@ public class Main {
         LOGGER.info("Initialized shares per holders list: " + company.getSharesPerHolder());
         LOGGER.info("Sorted shares per holders list: " + sortShareholders(company));
 
+        for (AbstractBank existingBank : financialSystem.getBanks()) {
+            existingBank.setBic(String.valueOf(rand.nextInt() % 100000000));
+        }
+        Set<AbstractBank> banks = new HashSet<>(financialSystem.getBanks());
+        LOGGER.info("Bank in set: " + banks.size());
+        banks.addAll(financialSystem.getBanks());
+        LOGGER.info("Bank in set: " + banks.size());
+        CommercialBank bankWithTheSameBic = new CommercialBank("NovaBank");
+        bankWithTheSameBic.setBic(financialSystem.getBanks().get(0).getBic());
+        banks.add(bankWithTheSameBic);
+        LOGGER.info("Bank in set: " + banks.size());
+
     }
 }

@@ -36,20 +36,6 @@ public class CommercialBank extends AbstractBank implements Regulatable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CommercialBank)) return false;
-        if (!super.equals(o)) return false;
-        CommercialBank other = (CommercialBank) o;
-        return requiredReserves.equals(other.requiredReserves);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), requiredReserves);
-    }
-
-    @Override
     public String toString() {
         return "CommercialBank{" +
                 "requiredReserves=" + requiredReserves + ", " + super.toString() +

@@ -19,7 +19,7 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
     private BigDecimal liabilities;
     private LocalDateTime licencedUntil;
     private List<AbstractBank> subsidiaryBanks;
-    private String BIC;
+    private String bic;
 
     public AbstractBank(String name) {
         this.name = name;
@@ -39,12 +39,12 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         subsidiaryBanks.remove(subsidiary);
     }
 
-    public String getBIC() {
-        return BIC;
+    public String getBic() {
+        return bic;
     }
 
-    public void setBIC(String BIC) {
-        this.BIC = BIC;
+    public void setBic(String bic) {
+        this.bic = bic;
     }
 
     public int getDefaultLicencePeriod() {
@@ -120,12 +120,12 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         if (this == o) return true;
         if (!(o instanceof AbstractBank)) return false;
         AbstractBank that = (AbstractBank) o;
-        return BIC.equals(that.BIC);
+        return bic.equals(that.bic);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(BIC);
+        return Objects.hash(bic);
     }
 
     @Override
@@ -136,7 +136,7 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
                 ", liabilities=" + liabilities +
                 ", licencedUntil=" + licencedUntil +
                 ", subsidiaryBanks=" + subsidiaryBanks +
-                ", BIC='" + BIC + '\'' +
+                ", BIC='" + bic + '\'' +
                 '}';
     }
 }

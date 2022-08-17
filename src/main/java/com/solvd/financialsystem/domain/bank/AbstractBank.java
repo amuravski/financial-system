@@ -31,10 +31,6 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.liabilities = liabilities;
     }
 
-    public void addSubsidiary(AbstractBank subsidiary) {
-        subsidiaryBanks.add(subsidiary);
-    }
-
     public void removeSubsidiary(AbstractBank subsidiary) {
         subsidiaryBanks.remove(subsidiary);
     }

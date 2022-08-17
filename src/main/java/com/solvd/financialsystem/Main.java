@@ -22,20 +22,16 @@ import static com.solvd.financialsystem.utils.Utils.*;
 
 public class Main {
 
-    static {
-        System.setProperty("log4j.configurationFile", "log4j2.xml");
-    }
-
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
         LocalDateTime defaultLicensedUntilDate = LocalDateTime.now().plusYears(5);
         CentralBank centralBank = new CentralBank(new BigDecimal("1.5"), new BigDecimal("2.5"), LocalDateTime.now());
         FinancialSystem financialSystem = new FinancialSystem(centralBank);
-        financialSystem.setBanks(new ArrayList<>());
-        financialSystem.setCompanies(new ArrayList<>());
-        financialSystem.setExchanges(new ArrayList<>());
-        financialSystem.setFunds(new ArrayList<>());
+        List<AbstractBank> banks = new ArrayList<>();
+        List<AbstractCompany> companies = new ArrayList<>();
+        List<AbstractExchange> exchanges = new ArrayList<>();
+        List<AbstractFund> funds = new ArrayList<>();
         AbstractCompany company = null;
         try {
             company = new LLC("OOO Minsk", new BigDecimal("520.0"), new BigDecimal("250.0"), 12);
@@ -49,14 +45,13 @@ public class Main {
         company.setSharesPerHolder(new HashMap<>());
         AbstractBank bank = new CommercialBank("FastBank", new BigDecimal("555555.0"), new BigDecimal("43434.0"));
         bank.setLicencedUntil(LocalDateTime.now().plusYears(2));
-        financialSystem.addActor(bank);
+        banks.add(bank);
         BigDecimal loanAmount = new BigDecimal("260.0");
 
         LOGGER.info("Is company " + company.getName() + " allowed to borrow " + loanAmount.toString() +
                 " from a bank " + bank.getName() + ": " + applyForLoan(bank, company, loanAmount));
 
-        financialSystem.addActor(bank);
-        financialSystem.addActor(company);
+        companies.add(company);
         LOGGER.info("Current key rate: " + centralBank.getKeyRate());
         BigDecimal inflation = new BigDecimal("5.3");
         LOGGER.info("Current inflation: " + inflation.toString());
@@ -66,30 +61,33 @@ public class Main {
         LOGGER.info("Current key rate: " + centralBank.getKeyRate());
 
         AbstractExchange stockExchange = new StockExchange("NYSE", LocalDateTime.now().plusYears(5), new BigDecimal("0.02"));
-        financialSystem.addActor(stockExchange);
+        exchanges.add(stockExchange);
         LOGGER.info(stockExchange);
 
         AbstractFund mutualFund = new MutualFund("Vanguard", new BigDecimal("100000.0"), new BigDecimal("100000.0"));
-        financialSystem.addActor(mutualFund);
+        funds.add(mutualFund);
         LOGGER.info(mutualFund);
 
         InsuranceBank insuranceBank = new InsuranceBank("InsurAce");
         insuranceBank.setLicencedUntil(defaultLicensedUntilDate);
-        financialSystem.addActor(insuranceBank);
+        banks.add(insuranceBank);
         InvestmentBank investmentBank = new InvestmentBank("Goldman");
         investmentBank.setLicencedUntil(defaultLicensedUntilDate);
         InvestmentBank biggerInvestmentBank = new InvestmentBank("Sachs");
         biggerInvestmentBank.setLicencedUntil(defaultLicensedUntilDate);
-        biggerInvestmentBank.setSubsidiaryBanks(new ArrayList<>());
-        biggerInvestmentBank.addSubsidiary(investmentBank);
+        biggerInvestmentBank.setSubsidiaryBanks(List.of(investmentBank));
         MortgageBank mortgageBank = new MortgageBank("Everyhome");
         mortgageBank.setLicencedUntil(defaultLicensedUntilDate);
-        financialSystem.addActor(investmentBank);
-        financialSystem.addActor(biggerInvestmentBank);
-        financialSystem.addActor(mortgageBank);
+        banks.add(investmentBank);
+        banks.add(biggerInvestmentBank);
+        banks.add(mortgageBank);
         LOGGER.info("Big investment bank: " + biggerInvestmentBank);
         LOGGER.info("It's subsidiary: " + investmentBank);
         LOGGER.info(mortgageBank);
+        financialSystem.setBanks(banks);
+        financialSystem.setCompanies(companies);
+        financialSystem.setExchanges(exchanges);
+        financialSystem.setFunds(funds);
         LOGGER.info("All the banks in financial system: " + financialSystem.getBanks() + "\n");
 
         holdAllMeetings(financialSystem);
@@ -118,13 +116,13 @@ public class Main {
         for (AbstractBank existingBank : financialSystem.getBanks()) {
             existingBank.setBic(String.valueOf(rand.nextInt() % 100000000));
         }
-        Set<AbstractBank> banks = new HashSet<>(financialSystem.getBanks());
-        LOGGER.info("Bank in set: " + banks.size());
-        banks.addAll(financialSystem.getBanks());
-        LOGGER.info("Bank in set: " + banks.size());
+        Set<AbstractBank> existingBanks = new HashSet<>(financialSystem.getBanks());
+        LOGGER.info("Bank in set: " + existingBanks.size());
+        existingBanks.addAll(financialSystem.getBanks());
+        LOGGER.info("Bank in set: " + existingBanks.size());
         CommercialBank bankWithTheSameBic = new CommercialBank("NovaBank");
         bankWithTheSameBic.setBic(financialSystem.getBanks().get(0).getBic());
-        banks.add(bankWithTheSameBic);
-        LOGGER.info("Bank in set: " + banks.size());
+        existingBanks.add(bankWithTheSameBic);
+        LOGGER.info("Bank in set: " + existingBanks.size());
     }
 }

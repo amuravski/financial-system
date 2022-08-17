@@ -30,7 +30,7 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.assets = assets;
         this.liabilities = liabilities;
     }
-
+    
     public void removeSubsidiary(AbstractBank subsidiary) {
         subsidiaryBanks.remove(subsidiary);
     }

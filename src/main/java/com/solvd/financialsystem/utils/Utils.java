@@ -3,7 +3,6 @@ package com.solvd.financialsystem.utils;
 import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.AbstractBank;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
-import com.solvd.financialsystem.domain.company.CompanyType;
 import com.solvd.financialsystem.domain.exchange.AbstractExchange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,16 +77,7 @@ public class Utils {
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map, SortOrder order) {
         List<Map.Entry<K, V>> listToSort = new ArrayList<>(map.entrySet());
-        if (order == SortOrder.ASCENDING) {
-            listToSort.sort(Map.Entry.comparingByValue());
-        } else {
-            listToSort.sort(new Comparator<Map.Entry<K, V>>() {
-                @Override
-                public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
-                    return o2.getValue().compareTo(o1.getValue());
-                }
-            });
-        }
+        listToSort.sort(order.getComparator());
         Map<K, V> sortedMap = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : listToSort) {
             sortedMap.put(entry.getKey(), entry.getValue());
@@ -98,12 +88,12 @@ public class Utils {
     public static void reportCompanyTypes(FinancialSystem financialSystem) {
         int commercialCompaniesCount = 0;
         int nonCommercialCompaniesCount = 0;
-        CompanyType companyType;
+        AbstractCompany.Type companyType;
         for (AbstractCompany company : financialSystem.getCompanies()) {
-            companyType = company.getCompanyType();
-            if (companyType.equals(CompanyType.COMMERCIAL))
+            companyType = company.getType();
+            if (companyType.equals(AbstractCompany.Type.COMMERCIAL))
                 commercialCompaniesCount++;
-            else if (companyType.equals(CompanyType.NONCOMMERCIAL)) {
+            else if (companyType.equals(AbstractCompany.Type.NONCOMMERCIAL)) {
                 nonCommercialCompaniesCount++;
             }
         }
@@ -118,6 +108,7 @@ public class Utils {
         int studentCounter = 0;
         int adultCounter = 0;
         int pensionerCounter = 0;
+        int economicallyActiveIndividuals = 0;
         for (Individual individual : financialSystem.getIndividuals()) {
             switch (individual.getIndividualType()) {
                 case CHILD:
@@ -136,12 +127,15 @@ public class Utils {
                     pensionerCounter++;
                     break;
             }
+            if (individual.getIndividualType().isEconomicallyActive())
+                economicallyActiveIndividuals++;
         }
         LOGGER.info("There are " +
                 childCounter + " children " +
                 pupilCounter + " pupils " +
                 studentCounter + " students " +
                 adultCounter + " adults and " +
-                pensionerCounter + " pensioners in the economy.");
+                pensionerCounter + " pensioners in the economy.\n" +
+                economicallyActiveIndividuals + " of them are economically active.");
     }
 }

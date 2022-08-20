@@ -13,7 +13,14 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
     private BigDecimal assets;
     private BigDecimal liabilities;
     private Map<String, Integer> sharesPerHolder;
-    private CompanyType companyType;
+    private Type type;
+
+    public enum Type {
+
+        COMMERCIAL,
+        NONCOMMERCIAL
+
+    }
 
     public AbstractCompany(String name, BigDecimal assets, BigDecimal liabilities) {
         this.name = name;
@@ -49,12 +56,12 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
         this.liabilities = liabilities;
     }
 
-    public CompanyType getCompanyType() {
-        return companyType;
+    public Type getType() {
+        return type;
     }
 
-    public void setCompanyType(CompanyType companyType) {
-        this.companyType = companyType;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Map<String, Integer> getSharesPerHolder() {
@@ -74,12 +81,12 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
                 Objects.equals(assets, that.assets) &&
                 Objects.equals(liabilities, that.liabilities) &&
                 Objects.equals(sharesPerHolder, that.sharesPerHolder) &&
-                companyType == that.companyType;
+                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, assets, liabilities, sharesPerHolder, companyType);
+        return Objects.hash(name, assets, liabilities, sharesPerHolder, type);
     }
 
     @Override
@@ -89,7 +96,7 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
                 ", assets=" + assets +
                 ", liabilities=" + liabilities +
                 ", sharesPerHolder=" + sharesPerHolder +
-                ", companyType=" + companyType +
+                ", companyType=" + type +
                 '}';
     }
 

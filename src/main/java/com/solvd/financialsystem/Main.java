@@ -3,10 +3,8 @@ package com.solvd.financialsystem;
 import com.solvd.financialsystem.domain.Conference;
 import com.solvd.financialsystem.domain.FinancialSystem;
 import com.solvd.financialsystem.domain.Individual;
-import com.solvd.financialsystem.domain.IndividualType;
 import com.solvd.financialsystem.domain.bank.*;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
-import com.solvd.financialsystem.domain.company.CompanyType;
 import com.solvd.financialsystem.domain.company.LLC;
 import com.solvd.financialsystem.domain.exception.IllegalAmountOfMembersException;
 import com.solvd.financialsystem.domain.exchange.AbstractExchange;
@@ -152,13 +150,16 @@ public class Main {
             LOGGER.error(e.getMessage(), e);
         }
         for (AbstractCompany existingCompany : financialSystem.getCompanies()) {
-            existingCompany.setCompanyType(rand.nextBoolean() ? CompanyType.COMMERCIAL : CompanyType.NONCOMMERCIAL);
+            existingCompany.setType(rand.nextBoolean() ? AbstractCompany.Type.COMMERCIAL : AbstractCompany.Type.NONCOMMERCIAL);
         }
         reportCompanyTypes(financialSystem);
         List<Individual> individuals = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
-            newIndividual.setIndividualType(IndividualType.values()[rand.nextInt(5)]);
+            newIndividual.setIndividualType(Individual.Type.values()[rand.nextInt(5)]);
+            if (newIndividual.getIndividualType() != Individual.Type.ADULT) {
+                newIndividual.getIndividualType().setEconomicallyActive(rand.nextInt(100) > 90);
+            }
             individuals.add(newIndividual);
         }
         financialSystem.setIndividuals(individuals);

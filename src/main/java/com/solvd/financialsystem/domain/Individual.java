@@ -8,12 +8,32 @@ public class Individual implements FinancialActor {
     private String name;
     private int currentOccupationTime;
     private BigDecimal monthlyIncome;
-    private IndividualType individualType;
+    private Type individualType;
 
-    public Individual(String name, int currentOccupationTime, BigDecimal monthlyIncome) {
-        this.name = name;
-        this.currentOccupationTime = currentOccupationTime;
-        this.monthlyIncome = monthlyIncome;
+    public enum Type {
+
+        CHILD,
+        PUPIL,
+        STUDENT,
+        ADULT(true),
+        PENSIONER;
+
+        private boolean isEconomicallyActive;
+
+        public boolean isEconomicallyActive() {
+            return isEconomicallyActive;
+        }
+
+        public void setEconomicallyActive(boolean economicallyActive) {
+            isEconomicallyActive = economicallyActive;
+        }
+
+        Type(boolean isEconomicallyActive) {
+            this.isEconomicallyActive = isEconomicallyActive;
+        }
+
+        Type() {
+        }
     }
 
     public Individual(String name) {
@@ -44,11 +64,11 @@ public class Individual implements FinancialActor {
         this.monthlyIncome = monthlyIncome;
     }
 
-    public IndividualType getIndividualType() {
+    public Type getIndividualType() {
         return individualType;
     }
 
-    public void setIndividualType(IndividualType individualType) {
+    public void setIndividualType(Type individualType) {
         this.individualType = individualType;
     }
 

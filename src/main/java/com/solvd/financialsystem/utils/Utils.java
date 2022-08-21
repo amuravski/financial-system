@@ -110,7 +110,7 @@ public class Utils {
         int pensionerCounter = 0;
         int economicallyActiveIndividuals = 0;
         for (Individual individual : financialSystem.getIndividuals()) {
-            switch (individual.getIndividualType()) {
+            switch (individual.getType()) {
                 case CHILD:
                     childCounter++;
                     break;
@@ -127,7 +127,7 @@ public class Utils {
                     pensionerCounter++;
                     break;
             }
-            if (individual.getIndividualType().isEconomicallyActive())
+            if (individual.getType().isEconomicallyActive())
                 economicallyActiveIndividuals++;
         }
         LOGGER.info("There are " +

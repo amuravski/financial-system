@@ -156,9 +156,9 @@ public class Main {
         List<Individual> individuals = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
-            newIndividual.setIndividualType(Individual.Type.values()[rand.nextInt(5)]);
-            if (newIndividual.getIndividualType() != Individual.Type.ADULT) {
-                newIndividual.getIndividualType().setEconomicallyActive(rand.nextInt(100) > 90);
+            newIndividual.setType(Individual.Type.values()[rand.nextInt(5)]);
+            if (newIndividual.getType() != Individual.Type.ADULT) {
+                newIndividual.getType().setEconomicallyActive(rand.nextInt(100) > 90);
             }
             individuals.add(newIndividual);
         }

@@ -8,11 +8,32 @@ public class Individual implements FinancialActor {
     private String name;
     private int currentOccupationTime;
     private BigDecimal monthlyIncome;
+    private Type type;
 
-    public Individual(String name, int currentOccupationTime, BigDecimal monthlyIncome) {
-        this.name = name;
-        this.currentOccupationTime = currentOccupationTime;
-        this.monthlyIncome = monthlyIncome;
+    public enum Type {
+
+        CHILD,
+        PUPIL,
+        STUDENT,
+        ADULT(true),
+        PENSIONER;
+
+        private boolean economicallyActive;
+
+        public boolean isEconomicallyActive() {
+            return economicallyActive;
+        }
+
+        public void setEconomicallyActive(boolean economicallyActive) {
+            this.economicallyActive = economicallyActive;
+        }
+
+        Type(boolean economicallyActive) {
+            this.economicallyActive = economicallyActive;
+        }
+
+        Type() {
+        }
     }
 
     public Individual(String name) {
@@ -43,19 +64,26 @@ public class Individual implements FinancialActor {
         this.monthlyIncome = monthlyIncome;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Individual)) return false;
-        Individual other = (Individual) o;
-        return currentOccupationTime == other.currentOccupationTime &&
-                name.equals(other.name) &&
-                Objects.equals(monthlyIncome, other.monthlyIncome);
+        if (o == null || getClass() != o.getClass()) return false;
+        Individual that = (Individual) o;
+        return name.equals(that.name) &&
+                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, currentOccupationTime, monthlyIncome);
+        return Objects.hash(name, type);
     }
 
     @Override
@@ -64,6 +92,7 @@ public class Individual implements FinancialActor {
                 "name='" + name + '\'' +
                 ", currentOccupationTime=" + currentOccupationTime +
                 ", monthlyIncome=" + monthlyIncome +
+                ", individualType=" + type +
                 '}';
     }
 }

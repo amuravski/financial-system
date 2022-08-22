@@ -2,6 +2,7 @@ package com.solvd.financialsystem;
 
 import com.solvd.financialsystem.domain.Conference;
 import com.solvd.financialsystem.domain.FinancialSystem;
+import com.solvd.financialsystem.domain.Individual;
 import com.solvd.financialsystem.domain.bank.*;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
 import com.solvd.financialsystem.domain.company.LLC;
@@ -10,10 +11,16 @@ import com.solvd.financialsystem.domain.exchange.AbstractExchange;
 import com.solvd.financialsystem.domain.exchange.StockExchange;
 import com.solvd.financialsystem.domain.fund.AbstractFund;
 import com.solvd.financialsystem.domain.fund.MutualFund;
+import com.solvd.financialsystem.utils.SortOrder;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.rmi.UnexpectedException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,7 +49,6 @@ public class Main {
                 LOGGER.info("Company " + company + " was successfully created.");
             }
         }
-        company.setSharesPerHolder(new HashMap<>());
         AbstractBank bank = new CommercialBank("FastBank", new BigDecimal("555555.0"), new BigDecimal("43434.0"));
         bank.setLicencedUntil(LocalDateTime.now().plusYears(2));
         banks.add(bank);
@@ -103,7 +109,7 @@ public class Main {
             LOGGER.info("holdConference() called.");
         }
 
-        Map<String, Integer> sharesPerHolders = company.getSharesPerHolder();
+        Map<String, Integer> sharesPerHolders = new HashMap<>();
         List<String> names = List.of("Nojus Salas", "Shakeel Fitzgerald", "Abdur-Rahman Welsh", "Sama Davis", "Gertrude Harris", "Halimah Young", "Kieran Bouvet", "Bernadette Booker", "Kerys Hayes", "Evie-Rose Mckenna");
         Random rand = new Random();
         for (String name : names) {
@@ -111,7 +117,7 @@ public class Main {
         }
         company.setSharesPerHolder(sharesPerHolders);
         LOGGER.info("Initialized shares per holders list: " + company.getSharesPerHolder());
-        LOGGER.info("Sorted shares per holders list: " + sortShareholders(company));
+        LOGGER.info("Sorted shares per holders list: " + sortMapByValue(company.getSharesPerHolder(), SortOrder.DESCENDING));
 
         for (AbstractBank existingBank : financialSystem.getBanks()) {
             existingBank.setBic(String.valueOf(rand.nextInt() % 100000000));
@@ -124,5 +130,39 @@ public class Main {
         bankWithTheSameBic.setBic(financialSystem.getBanks().get(0).getBic());
         existingBanks.add(bankWithTheSameBic);
         LOGGER.info("Bank in set: " + existingBanks.size());
+
+        String fromFile = "https://www.gutenberg.org/cache/epub/5089/pg5089.txt";
+        String fullText;
+        File toFile = new File("book.txt");
+        Map<String, Integer> wordsCount = new HashMap<>();
+        try {
+            FileUtils.copyURLToFile(new URL(fromFile), toFile, 10000, 10000);
+            fullText = FileUtils.readFileToString(toFile, StandardCharsets.UTF_8).toLowerCase();
+            for (String word : fullText.split("\\s|[\"#$%&()*+,\\-./:;<=>?@\\[\\\\\\]^_{|}~]")) {
+                wordsCount.putIfAbsent(word, 0);
+                wordsCount.put(word, wordsCount.get(word) + 1);
+            }
+            wordsCount.remove("");
+            Map<String, Integer> sortedWordsCount = sortMapByValue(wordsCount, SortOrder.ASCENDING);
+            LOGGER.info(sortedWordsCount);
+            FileUtils.writeLines(new File("countedWords.txt"), sortedWordsCount.entrySet());
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        for (AbstractCompany existingCompany : financialSystem.getCompanies()) {
+            existingCompany.setType(rand.nextBoolean() ? AbstractCompany.Type.COMMERCIAL : AbstractCompany.Type.NONCOMMERCIAL);
+        }
+        reportCompanyTypes(financialSystem);
+        List<Individual> individuals = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
+            newIndividual.setType(Individual.Type.values()[rand.nextInt(5)]);
+            if (newIndividual.getType() != Individual.Type.ADULT) {
+                newIndividual.getType().setEconomicallyActive(rand.nextInt(100) > 90);
+            }
+            individuals.add(newIndividual);
+        }
+        financialSystem.setIndividuals(individuals);
+        reportIndividualTypes(financialSystem);
     }
 }

@@ -1,17 +1,18 @@
 package com.solvd.financialsystem.utils;
 
-import com.solvd.financialsystem.domain.FinancialSystem;
-import com.solvd.financialsystem.domain.Meetable;
-import com.solvd.financialsystem.domain.Regulatable;
-import com.solvd.financialsystem.domain.Reportable;
+import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.AbstractBank;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
 import com.solvd.financialsystem.domain.exchange.AbstractExchange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.*;
 
 public class Utils {
+
+    private static final Logger LOGGER = LogManager.getLogger(Utils.class);
 
     public static <E extends AbstractBank, U extends AbstractCompany> boolean applyForLoan(E bank, U company, BigDecimal loanAmount) {
         BigDecimal bankAssets = bank.getAssets();
@@ -74,18 +75,67 @@ public class Utils {
         }
     }
 
-    public static Map<String, Integer> sortShareholders(AbstractCompany company) {
-        List<Map.Entry<String, Integer>> sharesPerHolder = new ArrayList<>(company.getSharesPerHolder().entrySet());
-        sharesPerHolder.sort(new Comparator<>() {
-            @Override
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return o2.getValue().compareTo(o1.getValue());
-            }
-        });
-        Map<String, Integer> sortedSharesPerHolders = new LinkedHashMap<>();
-        for (Map.Entry<String, Integer> entry : sharesPerHolder) {
-            sortedSharesPerHolders.put(entry.getKey(), entry.getValue());
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map, SortOrder order) {
+        List<Map.Entry<K, V>> listToSort = new ArrayList<>(map.entrySet());
+        listToSort.sort(order.getComparator());
+        Map<K, V> sortedMap = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : listToSort) {
+            sortedMap.put(entry.getKey(), entry.getValue());
         }
-        return sortedSharesPerHolders;
+        return sortedMap;
+    }
+
+    public static void reportCompanyTypes(FinancialSystem financialSystem) {
+        int commercialCompaniesCount = 0;
+        int nonCommercialCompaniesCount = 0;
+        AbstractCompany.Type companyType;
+        for (AbstractCompany company : financialSystem.getCompanies()) {
+            companyType = company.getType();
+            if (companyType.equals(AbstractCompany.Type.COMMERCIAL))
+                commercialCompaniesCount++;
+            else if (companyType.equals(AbstractCompany.Type.NONCOMMERCIAL)) {
+                nonCommercialCompaniesCount++;
+            }
+        }
+        LOGGER.info("There are " + commercialCompaniesCount +
+                " commercial and " + nonCommercialCompaniesCount +
+                " non-commercial companies in the economy.");
+    }
+
+    public static void reportIndividualTypes(FinancialSystem financialSystem) {
+        int childCounter = 0;
+        int pupilCounter = 0;
+        int studentCounter = 0;
+        int adultCounter = 0;
+        int pensionerCounter = 0;
+        int economicallyActiveIndividuals = 0;
+        for (Individual individual : financialSystem.getIndividuals()) {
+            switch (individual.getType()) {
+                case CHILD:
+                    childCounter++;
+                    break;
+                case PUPIL:
+                    pupilCounter++;
+                    break;
+                case STUDENT:
+                    studentCounter++;
+                    break;
+                case ADULT:
+                    adultCounter++;
+                    break;
+                case PENSIONER:
+                    pensionerCounter++;
+                    break;
+            }
+            if (individual.getType().isEconomicallyActive())
+                economicallyActiveIndividuals++;
+        }
+        LOGGER.info("There are " +
+                childCounter + " children " +
+                pupilCounter + " pupils " +
+                studentCounter + " students " +
+                adultCounter + " adults and " +
+                pensionerCounter + " pensioners in the economy.\n" +
+                economicallyActiveIndividuals + " of them are economically active.");
     }
 }

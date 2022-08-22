@@ -13,6 +13,14 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
     private BigDecimal assets;
     private BigDecimal liabilities;
     private Map<String, Integer> sharesPerHolder;
+    private Type type;
+
+    public enum Type {
+
+        COMMERCIAL,
+        NONCOMMERCIAL
+
+    }
 
     public AbstractCompany(String name, BigDecimal assets, BigDecimal liabilities) {
         this.name = name;
@@ -48,6 +56,14 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
         this.liabilities = liabilities;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public Map<String, Integer> getSharesPerHolder() {
         return sharesPerHolder;
     }
@@ -59,16 +75,18 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractCompany)) return false;
-        AbstractCompany other = (AbstractCompany) o;
-        return name.equals(other.name) &&
-                Objects.equals(assets, other.assets) &&
-                Objects.equals(liabilities, other.liabilities);
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractCompany that = (AbstractCompany) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(assets, that.assets) &&
+                Objects.equals(liabilities, that.liabilities) &&
+                Objects.equals(sharesPerHolder, that.sharesPerHolder) &&
+                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, assets, liabilities);
+        return Objects.hash(name, assets, liabilities, sharesPerHolder, type);
     }
 
     @Override
@@ -77,6 +95,8 @@ public abstract class AbstractCompany implements FinancialActor, Meetable {
                 "name='" + name + '\'' +
                 ", assets=" + assets +
                 ", liabilities=" + liabilities +
+                ", sharesPerHolder=" + sharesPerHolder +
+                ", companyType=" + type +
                 '}';
     }
 

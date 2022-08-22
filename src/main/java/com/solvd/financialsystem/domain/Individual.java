@@ -18,18 +18,18 @@ public class Individual implements FinancialActor {
         ADULT(true),
         PENSIONER;
 
-        private boolean isEconomicallyActive;
+        private boolean economicallyActive;
 
         public boolean isEconomicallyActive() {
-            return isEconomicallyActive;
+            return economicallyActive;
         }
 
         public void setEconomicallyActive(boolean economicallyActive) {
-            isEconomicallyActive = economicallyActive;
+            this.economicallyActive = economicallyActive;
         }
 
-        Type(boolean isEconomicallyActive) {
-            this.isEconomicallyActive = isEconomicallyActive;
+        Type(boolean economicallyActive) {
+            this.economicallyActive = economicallyActive;
         }
 
         Type() {

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class AbstractBank implements FinancialActor, LicenseExtendable {
 
@@ -30,7 +31,7 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.assets = assets;
         this.liabilities = liabilities;
     }
-    
+
     public void removeSubsidiary(AbstractBank subsidiary) {
         subsidiaryBanks.remove(subsidiary);
     }
@@ -71,21 +72,24 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
         this.name = name;
     }
 
-    public LocalDateTime getLicencedUntil() {
-        return licencedUntil;
+    public Optional<LocalDateTime> getLicencedUntil() {
+        Optional<LocalDateTime> result = Optional.empty();
+        if (licencedUntil != null) {
+            result = Optional.of(licencedUntil);
+        }
+        return result;
     }
 
     public void setLicencedUntil(LocalDateTime licencedUntil) {
         this.licencedUntil = licencedUntil;
     }
 
-    public List<AbstractBank> getSubsidiaryBanks() {
-        if (subsidiaryBanks == null) {
-            throw new NoSubsidiaryBankException(this.toString() + " has no subsidiaries.");
-        } else if (subsidiaryBanks.size() == 0) {
-            throw new NoSubsidiaryBankException(this.toString() + " has no subsidiaries.");
+    public Optional<List<AbstractBank>> getSubsidiaryBanks() {
+        Optional<List<AbstractBank>> result = Optional.empty();
+        if (subsidiaryBanks != null && subsidiaryBanks.size() > 0) {
+            result = Optional.of(subsidiaryBanks);
         }
-        return subsidiaryBanks;
+        return result;
     }
 
     public void setSubsidiaryBanks(List<AbstractBank> subsidiaryBanks) {
@@ -94,7 +98,8 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
 
     @Override
     public void extendLicence(int extendedForYears) {
-        LocalDateTime LicencedUntilDate = getLicencedUntil();
+        LocalDateTime LicencedUntilDate = getLicencedUntil()
+                .orElseThrow(() -> new LicenseExpiredException(this.toString() + " has no licence."));
         LocalDateTime newLicencedUntilDate = LicencedUntilDate.plusYears(extendedForYears);
         setLicencedUntil(newLicencedUntilDate);
     }
@@ -102,13 +107,10 @@ public abstract class AbstractBank implements FinancialActor, LicenseExtendable 
     @Override
     public void extendLicence() {
         int extendedFor = getDefaultLicencePeriod();
-        try {
-            LocalDateTime LicencedUntilDate = getLicencedUntil();
-            LocalDateTime newLicencedUntilDate = LicencedUntilDate.plusYears(extendedFor);
-            setLicencedUntil(newLicencedUntilDate);
-        } catch (NullPointerException e) {
-            throw new LicenseExpiredException(this.toString() + " has no licence.", e.getCause());
-        }
+        LocalDateTime LicencedUntilDate = getLicencedUntil()
+                .orElseThrow(() -> new LicenseExpiredException(this.toString() + " has no licence."));
+        LocalDateTime newLicencedUntilDate = LicencedUntilDate.plusYears(extendedFor);
+        setLicencedUntil(newLicencedUntilDate);
     }
 
     @Override

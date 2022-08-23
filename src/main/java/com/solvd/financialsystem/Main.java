@@ -12,22 +12,21 @@ import com.solvd.financialsystem.domain.exchange.StockExchange;
 import com.solvd.financialsystem.domain.fund.AbstractFund;
 import com.solvd.financialsystem.domain.fund.MutualFund;
 import com.solvd.financialsystem.utils.SortOrder;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.rmi.UnexpectedException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.solvd.financialsystem.utils.Utils.*;
 
@@ -154,14 +153,13 @@ public class Main {
             generatedCompany.setLiabilities(BigDecimal.valueOf(rand.nextInt(100)));
             return generatedCompany;
         };
-        for (int i = 0; i < 20; i++) {
-            financialSystem.addActor(randomCompanySupplier.getRandomCompany());
-        }
+        Stream.iterate(0, i -> i < 20, i -> ++i)
+                .forEach(x -> financialSystem.addActor(randomCompanySupplier.getRandomCompany()));
+
         financialSystem.getCompanies()
                 .forEach(existingCompany -> existingCompany.setType(rand.nextBoolean() ? AbstractCompany.Type.COMMERCIAL : AbstractCompany.Type.NONCOMMERCIAL));
         reportCompanyTypes(financialSystem);
 
-        List<Individual> individuals = new ArrayList<>();
         RandomIndividualSupplier randomIndividualSupplier = () -> {
             Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
             newIndividual.setType(Individual.Type.values()[rand.nextInt(5)]);
@@ -170,9 +168,10 @@ public class Main {
             }
             return newIndividual;
         };
-        for (int i = 0; i < 1000; i++) {
-            individuals.add(randomIndividualSupplier.getRandomIndividual());
-        }
+        List<Individual> individuals = IntStream.range(0, 1000)
+                .boxed()
+                .map(x -> randomIndividualSupplier.getRandomIndividual())
+                .collect(Collectors.toCollection(ArrayList::new));
         financialSystem.setIndividuals(individuals);
         reportIndividualTypes(financialSystem);
 
@@ -216,14 +215,25 @@ public class Main {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
-        Supplier<Integer> integerSupplier = rand::nextInt;
+
+        Supplier<Integer> supplier = rand::nextInt;
         Consumer<Number> printer = LOGGER::info;
-        printer.accept(integerSupplier.get());
+        printer.accept(supplier.get());
         BiConsumer<Integer, Integer> doublePrinter = (firstInt, secondInt) -> LOGGER.info(firstInt + " " + secondInt);
-        doublePrinter.accept(integerSupplier.get(), integerSupplier.get());
-        BiFunction<Integer, Integer, Double> divider = (dividend, divisor) -> (double) dividend / divisor;
-        printer.accept(divider.apply(integerSupplier.get(), integerSupplier.get()));
-        IntStream.
-        //UnaryOperator squarer
+        doublePrinter.accept(supplier.get(), supplier.get());
+        BiFunction<Integer, Integer, Integer> divider = (a, b) -> a / b;
+        printer.accept(divider.apply(supplier.get(), supplier.get()));
+        UnaryOperator<Integer> squarer = (x) -> x * x;
+        printer.accept(divider.andThen(squarer).apply(10, 2));
+        BinaryOperator<Integer> pow = (x, y) -> (int) Math.pow(x, y);
+        printer.accept(pow.apply(-2, 4));
+        Predicate<Integer> isPositive = (x) -> Integer.signum(x) == 1;
+        LOGGER.info(isPositive.and(x -> x > 3).test(pow.apply(-2, 2)));
+
+        Optional<AbstractCompany> minskCompany = financialSystem.getCompanies().stream().filter(existingCompany -> existingCompany.getName().contains("Minsk")).findFirst();
+        LOGGER.info("Minsk company " + (minskCompany.isPresent() ? minskCompany.get() : "not found."));
+        LOGGER.info("Sum of 20: " + IntStream.range(0, 20).reduce(Integer::sum).getAsInt());
+        Optional<Integer> bigNumber = IntStream.range(0, 20).boxed().map(x -> x * rand.nextInt(5)).filter(x -> x > 50).max(Integer::compareTo);
+        LOGGER.info(bigNumber.map(number -> "Big number: " + number).orElse(" no big numbers found."));
     }
 }

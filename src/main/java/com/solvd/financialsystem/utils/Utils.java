@@ -47,12 +47,10 @@ public class Utils {
     }
 
     public static void holdAllMeetings(FinancialSystem financialSystem) {
-        financialSystem.getCentralBank().meet();
-        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies())
+        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies(), List.of(financialSystem.getCentralBank()))
                 .flatMap(Collection::stream)
                 .filter(financialActor -> financialActor instanceof Meetable)
                 .forEach(meetableEntity -> ((Meetable) meetableEntity).meet());
-
     }
 
     public static void updateAllRequiredReserves(FinancialSystem financialSystem, BigDecimal requiredReserves) {
@@ -67,7 +65,6 @@ public class Utils {
                 .sorted(order.getComparator())
                 .collect(Collectors
                         .toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> u, LinkedHashMap::new));
-
     }
 
     public static void reportCompanyTypes(FinancialSystem financialSystem) {

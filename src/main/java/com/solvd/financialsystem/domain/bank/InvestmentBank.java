@@ -1,6 +1,7 @@
 package com.solvd.financialsystem.domain.bank;
 
 import com.solvd.financialsystem.domain.Reportable;
+import com.solvd.financialsystem.domain.exception.LicenseExpiredException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,7 +37,9 @@ public class InvestmentBank extends AbstractBank implements Reportable {
 
     @Override
     public void extendLicence(int years) {
-        this.setLicencedUntil(this.getLicencedUntil().plusYears(years));
+        this.setLicencedUntil(this.getLicencedUntil()
+                .orElseThrow(() -> new LicenseExpiredException(this.toString() + " has no licence."))
+                .plusYears(years));
     }
 
     @Override

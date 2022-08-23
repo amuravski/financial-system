@@ -1,6 +1,7 @@
 package com.solvd.financialsystem.domain.bank;
 
 import com.solvd.financialsystem.domain.Regulatable;
+import com.solvd.financialsystem.domain.exception.LicenseExpiredException;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -32,7 +33,9 @@ public class CommercialBank extends AbstractBank implements Regulatable {
 
     @Override
     public void extendLicence(int years) {
-        this.setLicencedUntil(this.getLicencedUntil().plusYears(years));
+        this.setLicencedUntil(this.getLicencedUntil()
+                .orElseThrow(() -> new LicenseExpiredException(this.toString() + " has no licence."))
+                .plusYears(years));
     }
 
     @Override

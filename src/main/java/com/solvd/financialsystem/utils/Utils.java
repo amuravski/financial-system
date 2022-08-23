@@ -3,12 +3,19 @@ package com.solvd.financialsystem.utils;
 import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.AbstractBank;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
-import com.solvd.financialsystem.domain.exchange.AbstractExchange;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -27,115 +34,78 @@ public class Utils {
     }
 
     public static void extendAllLicences(FinancialSystem financialSystem) {
-        for (AbstractBank bank : financialSystem.getBanks()) {
-            bank.extendLicence();
-        }
-        for (AbstractExchange exchange : financialSystem.getExchanges()) {
-            exchange.extendLicence();
-        }
+        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
+                .flatMap(Collection::stream)
+                .forEach(LicenseExtendable::extendLicence);
     }
 
     public static void publishReports(FinancialSystem financialSystem) {
-        for (AbstractBank bank : financialSystem.getBanks()) {
-            if (bank instanceof Reportable) {
-                Reportable reportingBank = (Reportable) bank;
-                reportingBank.publishReport();
-            }
-        }
-        for (AbstractCompany company : financialSystem.getCompanies()) {
-            if (company instanceof Reportable) {
-                Reportable reportingCompany = (Reportable) company;
-                reportingCompany.publishReport();
-            }
-        }
+        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies())
+                .flatMap(Collection::stream)
+                .filter(financialActor -> financialActor instanceof Reportable)
+                .forEach(reportableEntity -> ((Reportable) reportableEntity).publishReport());
     }
 
     public static void holdAllMeetings(FinancialSystem financialSystem) {
         financialSystem.getCentralBank().meet();
-        for (AbstractBank bank : financialSystem.getBanks()) {
-            if (bank instanceof Meetable) {
-                Meetable reportingBank = (Meetable) bank;
-                reportingBank.meet();
-            }
-        }
-        for (AbstractCompany company : financialSystem.getCompanies()) {
-            company.meet();
-        }
+        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies())
+                .flatMap(Collection::stream)
+                .filter(financialActor -> financialActor instanceof Meetable)
+                .forEach(meetableEntity -> ((Meetable) meetableEntity).meet());
+
     }
 
     public static void updateAllRequiredReserves(FinancialSystem financialSystem, BigDecimal requiredReserves) {
-        for (AbstractBank bank : financialSystem.getBanks()) {
-            if (bank instanceof Regulatable) {
-                Regulatable regulatedBank = (Regulatable) bank;
-                regulatedBank.setRequiredReserves(requiredReserves);
-            }
-        }
-        for (AbstractExchange exchange : financialSystem.getExchanges()) {
-            exchange.setRequiredReserves(requiredReserves);
-        }
+        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
+                .flatMap(Collection::stream)
+                .filter(financialActor -> financialActor instanceof Regulatable)
+                .forEach(regulatableEntity -> ((Regulatable) regulatableEntity).setRequiredReserves(requiredReserves));
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map, SortOrder order) {
-        List<Map.Entry<K, V>> listToSort = new ArrayList<>(map.entrySet());
-        listToSort.sort(order.getComparator());
-        Map<K, V> sortedMap = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : listToSort) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-        return sortedMap;
+        return map.entrySet().stream()
+                .sorted(order.getComparator())
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, Map.Entry::getValue, (u, v) -> u, LinkedHashMap::new));
+
     }
 
     public static void reportCompanyTypes(FinancialSystem financialSystem) {
-        int commercialCompaniesCount = 0;
-        int nonCommercialCompaniesCount = 0;
-        AbstractCompany.Type companyType;
-        for (AbstractCompany company : financialSystem.getCompanies()) {
-            companyType = company.getType();
-            if (companyType.equals(AbstractCompany.Type.COMMERCIAL))
-                commercialCompaniesCount++;
-            else if (companyType.equals(AbstractCompany.Type.NONCOMMERCIAL)) {
-                nonCommercialCompaniesCount++;
-            }
-        }
-        LOGGER.info("There are " + commercialCompaniesCount +
-                " commercial and " + nonCommercialCompaniesCount +
+        Map<AbstractCompany.Type, Long> companiesCountedByType = financialSystem.getCompanies().stream()
+                .collect(Collectors.groupingBy(AbstractCompany::getType, Collectors.counting()));
+        LOGGER.info("There are " + companiesCountedByType.get(AbstractCompany.Type.COMMERCIAL) +
+                " commercial and " + companiesCountedByType.get(AbstractCompany.Type.NONCOMMERCIAL) +
                 " non-commercial companies in the economy.");
     }
 
     public static void reportIndividualTypes(FinancialSystem financialSystem) {
-        int childCounter = 0;
-        int pupilCounter = 0;
-        int studentCounter = 0;
-        int adultCounter = 0;
-        int pensionerCounter = 0;
-        int economicallyActiveIndividuals = 0;
-        for (Individual individual : financialSystem.getIndividuals()) {
-            switch (individual.getIndividualType()) {
-                case CHILD:
-                    childCounter++;
-                    break;
-                case PUPIL:
-                    pupilCounter++;
-                    break;
-                case STUDENT:
-                    studentCounter++;
-                    break;
-                case ADULT:
-                    adultCounter++;
-                    break;
-                case PENSIONER:
-                    pensionerCounter++;
-                    break;
-            }
-            if (individual.getIndividualType().isEconomicallyActive())
-                economicallyActiveIndividuals++;
-        }
+        Map<Individual.Type, Long> individualsCountedByType = financialSystem.getIndividuals().stream()
+                .collect(Collectors.groupingBy(Individual::getType, Collectors.counting()));
+        long economicallyActiveIndividuals = financialSystem.getIndividuals().stream()
+                .filter(individual -> individual.getType().isEconomicallyActive()).count();
         LOGGER.info("There are " +
-                childCounter + " children " +
-                pupilCounter + " pupils " +
-                studentCounter + " students " +
-                adultCounter + " adults and " +
-                pensionerCounter + " pensioners in the economy.\n" +
+                individualsCountedByType.get(Individual.Type.CHILD) + " children " +
+                individualsCountedByType.get(Individual.Type.PUPIL) + " pupils " +
+                individualsCountedByType.get(Individual.Type.STUDENT) + " students " +
+                individualsCountedByType.get(Individual.Type.ADULT) + " adults and " +
+                individualsCountedByType.get(Individual.Type.PENSIONER) + " pensioners in the economy.\n" +
                 economicallyActiveIndividuals + " of them are economically active.");
+    }
+
+    public static void countWordsInBook(String link) {
+        try {
+            String fullText;
+            File toFile = new File("book.txt");
+            FileUtils.copyURLToFile(new URL(link), toFile, 10000, 10000);
+            fullText = FileUtils.readFileToString(toFile, StandardCharsets.UTF_8).toLowerCase();
+            Map<String, Long> wordsCount = Arrays.stream(fullText.split("\\s|[\"#$!%&()*+,\\-./:;<=>?@\\[\\\\\\]^_{|}~]"))
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            wordsCount.remove("");
+            Map<String, Long> sortedWordsCount = sortMapByValue(wordsCount, SortOrder.ASCENDING);
+            LOGGER.info(sortedWordsCount);
+            FileUtils.writeLines(new File("countedWords.txt"), sortedWordsCount.entrySet());
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 }

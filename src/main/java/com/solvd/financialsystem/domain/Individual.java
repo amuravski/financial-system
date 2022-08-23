@@ -8,7 +8,7 @@ public class Individual implements FinancialActor {
     private String name;
     private int currentOccupationTime;
     private BigDecimal monthlyIncome;
-    private Type individualType;
+    private Type type;
 
     public enum Type {
 
@@ -18,18 +18,18 @@ public class Individual implements FinancialActor {
         ADULT(true),
         PENSIONER;
 
-        private boolean isEconomicallyActive;
+        private boolean economicallyActive;
 
         public boolean isEconomicallyActive() {
-            return isEconomicallyActive;
+            return economicallyActive;
         }
 
         public void setEconomicallyActive(boolean economicallyActive) {
-            isEconomicallyActive = economicallyActive;
+            this.economicallyActive = economicallyActive;
         }
 
-        Type(boolean isEconomicallyActive) {
-            this.isEconomicallyActive = isEconomicallyActive;
+        Type(boolean economicallyActive) {
+            this.economicallyActive = economicallyActive;
         }
 
         Type() {
@@ -64,12 +64,12 @@ public class Individual implements FinancialActor {
         this.monthlyIncome = monthlyIncome;
     }
 
-    public Type getIndividualType() {
-        return individualType;
+    public Type getType() {
+        return type;
     }
 
-    public void setIndividualType(Type individualType) {
-        this.individualType = individualType;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     @Override
@@ -78,12 +78,12 @@ public class Individual implements FinancialActor {
         if (o == null || getClass() != o.getClass()) return false;
         Individual that = (Individual) o;
         return name.equals(that.name) &&
-                individualType == that.individualType;
+                type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, individualType);
+        return Objects.hash(name, type);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class Individual implements FinancialActor {
                 "name='" + name + '\'' +
                 ", currentOccupationTime=" + currentOccupationTime +
                 ", monthlyIncome=" + monthlyIncome +
-                ", individualType=" + individualType +
+                ", individualType=" + type +
                 '}';
     }
 }

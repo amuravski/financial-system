@@ -34,30 +34,35 @@ public class Utils {
     }
 
     public static void extendAllLicences(FinancialSystem financialSystem) {
-        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
-                .flatMap(Collection::stream)
-                .forEach(LicenseExtendable::extendLicence);
+        concat(financialSystem.getBanks(), financialSystem.getExchanges())
+                .filter(financialActor -> financialActor instanceof LicenseExtendable)
+                .forEach(licenseExtendableEntity -> ((LicenseExtendable) licenseExtendableEntity).extendLicence());
+//        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
+//                .flatMap(Collection::stream)
+//                .forEach(LicenseExtendable::extendLicence);
     }
 
     public static void publishReports(FinancialSystem financialSystem) {
-        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies())
-                .flatMap(Collection::stream)
+       concat(financialSystem.getBanks(), financialSystem.getCompanies())
                 .filter(financialActor -> financialActor instanceof Reportable)
                 .forEach(reportableEntity -> ((Reportable) reportableEntity).publishReport());
     }
 
     public static void holdAllMeetings(FinancialSystem financialSystem) {
-        Stream.of(financialSystem.getBanks(), financialSystem.getCompanies(), List.of(financialSystem.getCentralBank()))
-                .flatMap(Collection::stream)
+       concat(financialSystem.getBanks(), financialSystem.getCompanies(), List.of(financialSystem.getCentralBank()))
                 .filter(financialActor -> financialActor instanceof Meetable)
                 .forEach(meetableEntity -> ((Meetable) meetableEntity).meet());
     }
 
     public static void updateAllRequiredReserves(FinancialSystem financialSystem, BigDecimal requiredReserves) {
-        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
-                .flatMap(Collection::stream)
+        concat(financialSystem.getBanks(), financialSystem.getExchanges())
                 .filter(financialActor -> financialActor instanceof Regulatable)
                 .forEach(regulatableEntity -> ((Regulatable) regulatableEntity).setRequiredReserves(requiredReserves));
+    }
+
+    private static Stream<?> concat(List<?>... list) {
+        return Arrays.stream(list)
+                .flatMap(Collection::stream);
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map, SortOrder order) {
@@ -104,5 +109,10 @@ public class Utils {
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+
+    public static void showAndDoAfter(FinancialActor actor, IDoAfter action){
+        LOGGER.info(actor);
+        action.doAfter(actor);
     }
 }

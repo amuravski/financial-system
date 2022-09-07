@@ -3,14 +3,14 @@ package com.solvd.financialsystem;
 import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.*;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
-import com.solvd.financialsystem.domain.company.CJSC;
-import com.solvd.financialsystem.domain.company.JSC;
 import com.solvd.financialsystem.domain.company.LLC;
+import com.solvd.financialsystem.domain.connections.ConnectionPool;
 import com.solvd.financialsystem.domain.exception.IllegalAmountOfMembersException;
 import com.solvd.financialsystem.domain.exchange.AbstractExchange;
 import com.solvd.financialsystem.domain.exchange.StockExchange;
 import com.solvd.financialsystem.domain.fund.AbstractFund;
 import com.solvd.financialsystem.domain.fund.MutualFund;
+import com.solvd.financialsystem.utils.RandomCompanySupplier;
 import com.solvd.financialsystem.utils.SortOrder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +23,9 @@ import java.math.BigDecimal;
 import java.rmi.UnexpectedException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -117,13 +120,12 @@ public class Main {
         Random rand = new Random();
         names.forEach(name -> sharesPerHolders.put(name, rand.nextInt() % 100 + 105));
         company.setSharesPerHolder(sharesPerHolders);
+        company.setType(AbstractCompany.Type.COMMERCIAL);
         LOGGER.info("Initialized shares per holders list: " + company.getSharesPerHolder());
         LOGGER.info("Sorted shares per holders list: " + sortMapByValue(company.getSharesPerHolder(), SortOrder.DESCENDING));
 
-        RandomBicSupplier randomBicSupplier = () -> String.valueOf(rand.nextInt() % 100000000);
         financialSystem.getBanks().forEach((existingBank) ->
-                existingBank.setBic(randomBicSupplier.getRandomBic()));
-
+                existingBank.setBic(String.valueOf(rand.nextInt() % 100000000)));
         Set<AbstractBank> existingBanks = new HashSet<>(financialSystem.getBanks());
         LOGGER.info("Bank in set: " + existingBanks.size());
         existingBanks.addAll(financialSystem.getBanks());
@@ -134,43 +136,21 @@ public class Main {
         LOGGER.info("Bank in set: " + existingBanks.size());
 
         //countWordsInBook("https://www.gutenberg.org/cache/epub/5089/pg5089.txt");
-
-        RandomCompanySupplier randomCompanySupplier = () -> {
-            AbstractCompany generatedCompany = null;
-            String randomName = String.valueOf(rand.nextInt() % 100000);
-            switch (rand.nextInt(3)) {
-                case 0:
-                    generatedCompany = new CJSC(randomName);
-                    break;
-                case 1:
-                    generatedCompany = new JSC(randomName);
-                    break;
-                case 2:
-                    generatedCompany = new LLC(randomName);
-                    break;
-            }
-            generatedCompany.setAssets(BigDecimal.valueOf(100 + rand.nextInt(100)));
-            generatedCompany.setLiabilities(BigDecimal.valueOf(rand.nextInt(100)));
-            return generatedCompany;
-        };
+        RandomCompanySupplier randomCompanySupplier = new RandomCompanySupplier();
         Stream.iterate(0, i -> i < 20, i -> ++i)
-                .forEach(x -> financialSystem.addActor(randomCompanySupplier.getRandomCompany()));
-
-        financialSystem.getCompanies()
-                .forEach(existingCompany -> existingCompany.setType(rand.nextBoolean() ? AbstractCompany.Type.COMMERCIAL : AbstractCompany.Type.NONCOMMERCIAL));
+                .forEach(x -> financialSystem.addActor(randomCompanySupplier.get()));
         reportCompanyTypes(financialSystem);
 
-        RandomIndividualSupplier randomIndividualSupplier = () -> {
-            Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
-            newIndividual.setType(Individual.Type.values()[rand.nextInt(5)]);
-            if (newIndividual.getType() != Individual.Type.ADULT) {
-                newIndividual.getType().setEconomicallyActive(rand.nextInt(100) > 90);
-            }
-            return newIndividual;
-        };
         List<Individual> individuals = IntStream.range(0, 1000)
                 .boxed()
-                .map(x -> randomIndividualSupplier.getRandomIndividual())
+                .map(x -> {
+                    Individual newIndividual = new Individual(String.valueOf(rand.nextInt() % 100000));
+                    newIndividual.setType(Individual.Type.values()[rand.nextInt(5)]);
+                    if (newIndividual.getType() != Individual.Type.ADULT) {
+                        newIndividual.getType().setEconomicallyActive(rand.nextInt(100) > 90);
+                    }
+                    return newIndividual;
+                })
                 .collect(Collectors.toCollection(ArrayList::new));
         financialSystem.setIndividuals(individuals);
         reportIndividualTypes(financialSystem);
@@ -232,8 +212,70 @@ public class Main {
 
         Optional<AbstractCompany> minskCompany = financialSystem.getCompanies().stream().filter(existingCompany -> existingCompany.getName().contains("Minsk")).findFirst();
         LOGGER.info("Minsk company " + (minskCompany.isPresent() ? minskCompany.get() : "not found."));
-        LOGGER.info("Sum of 20: " + IntStream.range(0, 20).reduce(Integer::sum).getAsInt());
+        LOGGER.info("Sum of 20: " + IntStream.range(0, 20).reduce(Integer::sum).orElse(0));
         Optional<Integer> bigNumber = IntStream.range(0, 20).boxed().map(x -> x * rand.nextInt(5)).filter(x -> x > 50).max(Integer::compareTo);
         LOGGER.info(bigNumber.map(number -> "Big number: " + number).orElse(" no big numbers found."));
+
+        IDoAfter meet = (actor) -> ((Meetable) actor).meet();
+        IDoAfter extendLicense = (actor) -> ((LicenseExtendable) actor).extendLicence();
+
+        financialSystem.getCompanies().forEach(existingCompany -> showAndDoAfter(existingCompany, meet));
+        financialSystem.getBanks().forEach(existingBank -> showAndDoAfter(existingBank, extendLicense));
+
+        int connectionPoolSize = 10;
+        ConnectionPool connectionPool = ConnectionPool.getInstance(connectionPoolSize);
+        Runnable poolRunner = () -> {
+            try {
+                Thread.sleep(0, rand.nextInt(1));
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            ConnectionPool.getInstance().getConnection()
+                    .orElseThrow(() -> new RuntimeException("Unable to get connection"))
+                    .create();
+        };
+        new Thread(() -> IntStream.range(0, 5).boxed()
+                .forEach((x) -> new Thread(poolRunner).run()))
+                .start();
+        IntStream.range(0, 5).boxed().forEach((x) -> new Thread(() -> ConnectionPool.getInstance()
+                .getConnection()
+                .orElseThrow(() -> new RuntimeException("Unable to get connection"))
+                .update()).start());
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        connectionPool.releaseAll();
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        new Thread(() -> {
+        });
+        IntStream.range(0, 10).boxed()
+                .map(x -> executorService.submit(() -> {
+                    ConnectionPool.getInstance().getConnection()
+                            .orElseThrow(() -> new RuntimeException("Unable to get connection"))
+                            .delete();
+                }))
+                .peek((x) -> {
+                    try {
+                        Thread.sleep(0, rand.nextInt(5));
+                    } catch (InterruptedException e) {
+                        LOGGER.error(e.getMessage(), e);
+                    }
+                })
+                .forEach(future -> LOGGER.info(future + " " + (future.isDone() ? " done" : " not done yet")));
+        connectionPool.releaseAll();
+        IntStream.range(0, 10).boxed()
+                .map(i -> CompletableFuture.supplyAsync(() -> {
+                    ConnectionPool.getInstance()
+                            .getConnection()
+                            .orElseThrow(() -> new RuntimeException("Unable to get connection"))
+                            .read();
+                    return i;
+                }, executorService)
+                        .thenAccept(future -> LOGGER.info(future + " completable future done")))
+                .forEach(future -> future.complete(null));
+        executorService.shutdown();
     }
 }

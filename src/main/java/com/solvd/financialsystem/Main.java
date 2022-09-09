@@ -4,7 +4,8 @@ import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.*;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
 import com.solvd.financialsystem.domain.company.LLC;
-import com.solvd.financialsystem.domain.connections.ConnectionPool;
+import com.solvd.financialsystem.domain.connection.Connection;
+import com.solvd.financialsystem.domain.connection.ConnectionPool;
 import com.solvd.financialsystem.domain.exception.IllegalAmountOfMembersException;
 import com.solvd.financialsystem.domain.exchange.AbstractExchange;
 import com.solvd.financialsystem.domain.exchange.StockExchange;
@@ -12,6 +13,7 @@ import com.solvd.financialsystem.domain.fund.AbstractFund;
 import com.solvd.financialsystem.domain.fund.MutualFund;
 import com.solvd.financialsystem.utils.RandomCompanySupplier;
 import com.solvd.financialsystem.utils.SortOrder;
+import com.solvd.financialsystem.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -222,60 +224,28 @@ public class Main {
         financialSystem.getCompanies().forEach(existingCompany -> showAndDoAfter(existingCompany, meet));
         financialSystem.getBanks().forEach(existingBank -> showAndDoAfter(existingBank, extendLicense));
 
-        int connectionPoolSize = 10;
-        ConnectionPool connectionPool = ConnectionPool.getInstance(connectionPoolSize);
-        Runnable poolRunner = () -> {
-            try {
-                Thread.sleep(0, rand.nextInt(1));
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-            ConnectionPool.getInstance().getConnection()
-                    .orElseThrow(() -> new RuntimeException("Unable to get connection"))
-                    .create();
-        };
-        new Thread(() -> IntStream.range(0, 5).boxed()
-                .forEach((x) -> new Thread(poolRunner).run()))
-                .start();
-        IntStream.range(0, 5).boxed().forEach((x) -> new Thread(() -> ConnectionPool.getInstance()
-                .getConnection()
-                .orElseThrow(() -> new RuntimeException("Unable to get connection"))
-                .update()).start());
+        int connectionPoolSize = 5;
+        IUseAndRelease create = (Connection::update);
+        IUseAndRelease read = (Connection::read);
+        IUseAndRelease update = (Connection::update);
+        IUseAndRelease delete = (Connection::delete);
+        ConnectionPool.getInstance(connectionPoolSize);
+        Runnable poolRunner = () -> Utils.useAndRelease(create);
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        connectionPool.releaseAll();
+        IntStream.range(0, 5).boxed()
+                .forEach((x) -> new Thread(poolRunner).start());
+
+        IntStream.range(0, 5).boxed()
+                .forEach((x) -> new Thread(() -> Utils.useAndRelease(read)).start());
+
+
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        new Thread(() -> {
-        });
+        new Thread(() -> IntStream.range(0, 10).boxed()
+                .map(x -> executorService.submit(() -> Utils.useAndRelease(update)))
+                .forEach(LOGGER::info));
+
         IntStream.range(0, 10).boxed()
-                .map(x -> executorService.submit(() -> {
-                    ConnectionPool.getInstance().getConnection()
-                            .orElseThrow(() -> new RuntimeException("Unable to get connection"))
-                            .delete();
-                }))
-                .peek((x) -> {
-                    try {
-                        Thread.sleep(0, rand.nextInt(5));
-                    } catch (InterruptedException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                })
-                .forEach(future -> LOGGER.info(future + " " + (future.isDone() ? " done" : " not done yet")));
-        connectionPool.releaseAll();
-        IntStream.range(0, 10).boxed()
-                .map(i -> CompletableFuture.supplyAsync(() -> {
-                    ConnectionPool.getInstance()
-                            .getConnection()
-                            .orElseThrow(() -> new RuntimeException("Unable to get connection"))
-                            .read();
-                    return i;
-                }, executorService)
-                        .thenAccept(future -> LOGGER.info(future + " completable future done")))
-                .forEach(future -> future.complete(null));
+                .forEach(i -> CompletableFuture.runAsync(() -> Utils.useAndRelease(delete), executorService));
         executorService.shutdown();
     }
 }

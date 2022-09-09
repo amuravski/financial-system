@@ -3,6 +3,8 @@ package com.solvd.financialsystem.utils;
 import com.solvd.financialsystem.domain.*;
 import com.solvd.financialsystem.domain.bank.AbstractBank;
 import com.solvd.financialsystem.domain.company.AbstractCompany;
+import com.solvd.financialsystem.domain.connection.Connection;
+import com.solvd.financialsystem.domain.connection.ConnectionPool;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,13 +45,13 @@ public class Utils {
     }
 
     public static void publishReports(FinancialSystem financialSystem) {
-       concat(financialSystem.getBanks(), financialSystem.getCompanies())
+        concat(financialSystem.getBanks(), financialSystem.getCompanies())
                 .filter(financialActor -> financialActor instanceof Reportable)
                 .forEach(reportableEntity -> ((Reportable) reportableEntity).publishReport());
     }
 
     public static void holdAllMeetings(FinancialSystem financialSystem) {
-       concat(financialSystem.getBanks(), financialSystem.getCompanies(), List.of(financialSystem.getCentralBank()))
+        concat(financialSystem.getBanks(), financialSystem.getCompanies(), List.of(financialSystem.getCentralBank()))
                 .filter(financialActor -> financialActor instanceof Meetable)
                 .forEach(meetableEntity -> ((Meetable) meetableEntity).meet());
     }
@@ -111,8 +113,19 @@ public class Utils {
         }
     }
 
-    public static void showAndDoAfter(FinancialActor actor, IDoAfter action){
+    public static void showAndDoAfter(FinancialActor actor, IDoAfter action) {
         LOGGER.info(actor);
         action.doAfter(actor);
+    }
+
+    public static void useAndRelease(IUseAndRelease action) {
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getInstance()
+                    .getConnection();
+        } catch (InterruptedException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        action.useAndRelease(connection);
     }
 }

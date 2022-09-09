@@ -1,7 +1,7 @@
 package com.solvd.financialsystem.domain.connection;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class ConnectionPool {
 
@@ -12,7 +12,7 @@ public class ConnectionPool {
 
     private ConnectionPool(int size) {
         this.size = size;
-        connectionPool = new LinkedBlockingQueue<>(size);
+        connectionPool = new ArrayBlockingQueue<>(size);
     }
 
     synchronized public static ConnectionPool getInstance(int size) {
@@ -26,21 +26,19 @@ public class ConnectionPool {
         return INSTANCE;
     }
 
-    public Connection getConnection() throws InterruptedException {
+    public synchronized Connection getConnection() {
         Connection result;
-        synchronized (connectionPool) {
-            if (connectionPool.size() < size) {
-                result = new Connection();
-            } else {
-                result = connectionPool.take();
-            }
+        if (connectionPool.size() < size) {
+            result = new Connection();
+            connectionPool.add(result);
+        } else {
+            result = connectionPool.peek();
         }
         return result;
     }
 
-    public void releaseConnection(Connection connection) {
-        synchronized (connectionPool) {
-            connectionPool.add(connection);
-        }
+    public synchronized void releaseConnection(Connection connection) {
+        connectionPool.offer(connection);
+        //notifyAll();
     }
 }

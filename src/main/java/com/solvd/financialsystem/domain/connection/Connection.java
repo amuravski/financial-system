@@ -8,23 +8,31 @@ public class Connection {
     private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 
     public void create() {
-        sleep(1000);
-        LOGGER.info("Created");
+        synchronized (this) {
+            sleep(500);
+            LOGGER.info("Created");
+        }
     }
 
     public void read() {
-        sleep(1000);
-        LOGGER.info("Read");
+        synchronized (this) {
+            sleep(500);
+            LOGGER.info("Read");
+        }
     }
 
     public void update() {
-        sleep(1000);
-        LOGGER.info("Updated");
+        synchronized (this) {
+            sleep(500);
+            LOGGER.info("Updated");
+        }
     }
 
     public void delete() {
-        sleep(1000);
-        LOGGER.info("Deleted");
+        synchronized (this) {
+            sleep(500);
+            LOGGER.info("Deleted");
+        }
     }
 
     private void sleep(int milliseconds) {

@@ -224,27 +224,27 @@ public class Main {
         financialSystem.getCompanies().forEach(existingCompany -> showAndDoAfter(existingCompany, meet));
         financialSystem.getBanks().forEach(existingBank -> showAndDoAfter(existingBank, extendLicense));
 
-        int connectionPoolSize = 5;
-        IUseAndRelease create = (Connection::update);
+        int connectionPoolSize = 3;
+        IUseAndRelease create = (Connection::create);
         IUseAndRelease read = (Connection::read);
         IUseAndRelease update = (Connection::update);
         IUseAndRelease delete = (Connection::delete);
         ConnectionPool.getInstance(connectionPoolSize);
         Runnable poolRunner = () -> Utils.useAndRelease(create);
 
-        IntStream.range(0, 5).boxed()
+        IntStream.range(0, 20).boxed()
                 .forEach((x) -> new Thread(poolRunner).start());
 
-        IntStream.range(0, 5).boxed()
+        IntStream.range(0, 20).boxed()
                 .forEach((x) -> new Thread(() -> Utils.useAndRelease(read)).start());
 
 
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        new Thread(() -> IntStream.range(0, 10).boxed()
-                .map(x -> executorService.submit(() -> Utils.useAndRelease(update)))
-                .forEach(LOGGER::info));
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        IntStream.range(0, 20).boxed()
+                .map(x -> executorService.submit(() -> Utils.useAndRelease(update), executorService))
+                .forEach(LOGGER::info);
 
-        IntStream.range(0, 10).boxed()
+        IntStream.range(0, 20).boxed()
                 .forEach(i -> CompletableFuture.runAsync(() -> Utils.useAndRelease(delete), executorService));
         executorService.shutdown();
     }

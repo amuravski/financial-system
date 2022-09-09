@@ -119,13 +119,9 @@ public class Utils {
     }
 
     public static void useAndRelease(IUseAndRelease action) {
-        Connection connection = null;
-        try {
-            connection = ConnectionPool.getInstance()
-                    .getConnection();
-        } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        ConnectionPool connectionPool = ConnectionPool.getInstance();
+        Connection connection = connectionPool.getConnection();
         action.useAndRelease(connection);
+        connectionPool.releaseConnection(connection);
     }
 }

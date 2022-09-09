@@ -6,40 +6,32 @@ import org.apache.logging.log4j.Logger;
 public class Connection {
 
     private static final Logger LOGGER = LogManager.getLogger(Connection.class);
+    private static final int SLEEP_INTERVAL = 500;
 
     public void create() {
-        synchronized (this) {
-            sleep(500);
-            LOGGER.info("Created");
-        }
+        doAction("Created");
     }
 
     public void read() {
-        synchronized (this) {
-            sleep(500);
-            LOGGER.info("Read");
-        }
+        doAction("Read");
     }
 
     public void update() {
-        synchronized (this) {
-            sleep(500);
-            LOGGER.info("Updated");
-        }
+        doAction("Updated");
     }
 
     public void delete() {
-        synchronized (this) {
-            sleep(500);
-            LOGGER.info("Deleted");
-        }
+        doAction("Deleted");
     }
 
-    private void sleep(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
+    private void doAction(String actionName) {
+        synchronized (this) {
+            try {
+                Thread.sleep(SLEEP_INTERVAL);
+            } catch (InterruptedException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            LOGGER.info(actionName);
         }
     }
 }

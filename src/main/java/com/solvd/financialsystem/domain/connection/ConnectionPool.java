@@ -39,6 +39,5 @@ public class ConnectionPool {
 
     public synchronized void releaseConnection(Connection connection) {
         connectionPool.offer(connection);
-        //notifyAll();
     }
 }

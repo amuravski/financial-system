@@ -39,9 +39,6 @@ public class Utils {
         concat(financialSystem.getBanks(), financialSystem.getExchanges())
                 .filter(financialActor -> financialActor instanceof LicenseExtendable)
                 .forEach(licenseExtendableEntity -> ((LicenseExtendable) licenseExtendableEntity).extendLicence());
-//        Stream.of(financialSystem.getBanks(), financialSystem.getExchanges())
-//                .flatMap(Collection::stream)
-//                .forEach(LicenseExtendable::extendLicence);
     }
 
     public static void publishReports(FinancialSystem financialSystem) {

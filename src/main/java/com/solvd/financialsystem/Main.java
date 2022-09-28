@@ -1,46 +1,24 @@
 package com.solvd.financialsystem;
 
-import com.solvd.financialsystem.domain.*;
-import com.solvd.financialsystem.domain.bank.*;
-import com.solvd.financialsystem.domain.company.AbstractCompany;
-import com.solvd.financialsystem.domain.company.LLC;
+import com.solvd.financialsystem.domain.IUseAndRelease;
 import com.solvd.financialsystem.domain.connection.Connection;
 import com.solvd.financialsystem.domain.connection.ConnectionPool;
-import com.solvd.financialsystem.domain.exception.IllegalAmountOfMembersException;
-import com.solvd.financialsystem.domain.exchange.AbstractExchange;
-import com.solvd.financialsystem.domain.exchange.StockExchange;
-import com.solvd.financialsystem.domain.fund.AbstractFund;
-import com.solvd.financialsystem.domain.fund.MutualFund;
-import com.solvd.financialsystem.utils.RandomCompanySupplier;
-import com.solvd.financialsystem.utils.SortOrder;
 import com.solvd.financialsystem.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.rmi.UnexpectedException;
-import java.time.LocalDateTime;
-import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.*;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static com.solvd.financialsystem.utils.Utils.*;
 
 public class Main {
 
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        LocalDateTime defaultLicensedUntilDate = LocalDateTime.now().plusYears(5);
+        /*LocalDateTime defaultLicensedUntilDate = LocalDateTime.now().plusYears(5);
         CentralBank centralBank = new CentralBank(new BigDecimal("1.5"), new BigDecimal("2.5"), LocalDateTime.now());
         FinancialSystem financialSystem = new FinancialSystem(centralBank);
         List<AbstractBank> banks = new ArrayList<>();
@@ -223,14 +201,15 @@ public class Main {
 
         financialSystem.getCompanies().forEach(existingCompany -> showAndDoAfter(existingCompany, meet));
         financialSystem.getBanks().forEach(existingBank -> showAndDoAfter(existingBank, extendLicense));
-
+*/
         int connectionPoolSize = 3;
         IUseAndRelease create = (Connection::create);
         IUseAndRelease read = (Connection::read);
         IUseAndRelease update = (Connection::update);
         IUseAndRelease delete = (Connection::delete);
+        Consumer<Connection> createConsumer = (Connection::create);
         ConnectionPool.getInstance(connectionPoolSize);
-        Runnable poolRunner = () -> Utils.useAndRelease(create);
+        Runnable poolRunner = () ->  Utils.useAndRelease(createConsumer);;
 
         IntStream.range(0, 20).boxed()
                 .forEach((x) -> new Thread(poolRunner).start());
@@ -247,5 +226,7 @@ public class Main {
         IntStream.range(0, 20).boxed()
                 .forEach(i -> CompletableFuture.runAsync(() -> Utils.useAndRelease(delete), executorService));
         executorService.shutdown();
+
+        //author commit test
     }
 }

@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,6 +120,13 @@ public class Utils {
         ConnectionPool connectionPool = ConnectionPool.getInstance();
         Connection connection = connectionPool.getConnection();
         action.useAndRelease(connection);
+        connectionPool.releaseConnection(connection);
+    }
+
+    public static void useAndRelease(Consumer<Connection> action) {
+        ConnectionPool connectionPool = ConnectionPool.getInstance();
+        Connection connection = connectionPool.getConnection();
+        action.accept(connection);
         connectionPool.releaseConnection(connection);
     }
 }
